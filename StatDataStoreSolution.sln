@@ -5,19 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatData", "StatData\StatDa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatApp", "StatApp\StatApp.csproj", "{0BF4214E-E61C-4E33-886C-AF835460F4D8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infos", "Infos", "{9D42719B-7E6F-4876-9953-30D7176BE0A9}"
+	ProjectSection(SolutionItems) = preProject
+		README = README
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://vega:8080/tfs/defaultcollection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = StatApp\\StatApp.csproj
-		SccProjectName1 = StatApp
-		SccLocalPath1 = StatApp
-		SccProjectUniqueName2 = StatData\\StatData.csproj
-		SccProjectName2 = StatData
-		SccLocalPath2 = StatData
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

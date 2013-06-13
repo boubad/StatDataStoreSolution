@@ -1,2 +1,10 @@
 
 PROJET STATDATASTORE
+Dépendances:
+	Entity Framemork version 5.0.0
+	Entity Framemork.fr version 5.0.0
+	MathNet.Numerics version 2.5.0
+	OxyPlot.Wpf_NoPCL version 2013.1.46
+	Microsoft.Research.Science.Data version 1.3.14517
+Base de données: SQL Server Compact  4.0
+
