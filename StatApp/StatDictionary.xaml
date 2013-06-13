@@ -1,0 +1,203 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:local="clr-namespace:StatApp.Controles"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <local:DoubleConverter x:Key="double_converter" />
+    <local:IntConverter x:Key="int_converter" />
+    <local:IndexConverter x:Key="index_converter" />
+    <local:ImageConverter x:Key="image_converter" />
+    <local:LinkTypeConverter x:Key="linktype_converter" />
+    <local:MatGrayScaleConterver x:Key="matgrayscaleConverter" />
+    <local:MatricteComputeModeConverter x:Key="matrice_mode_converter" />
+    <!-- ====================================-->
+    <local:DisplayItemDataTemplateSelector x:Key="display_templateselector" />
+    <local:MatCellItemDataTemplateSelector x:Key="cell_templateselector" />
+    <SolidColorBrush x:Key="inf_brush" Color="DarkKhaki" />
+    <SolidColorBrush x:Key="sup_brush" Color="Black" />
+    <SolidColorBrush x:Key="sum_brush" Color="Red" />
+    <!-- ================================== -->
+    <Style x:Key="mylabelstyle_display"  TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontStyle" Value="Italic" />
+        <Setter Property="Margin" Value="0,5" />
+        <Setter Property="Width" Value="90" />
+    </Style>
+    <!-- =================================================-->
+    <DataTemplate x:Key="display_default_template">
+        <TextBlock Style="{StaticResource mylabelstyle_display}" Text="" />
+    </DataTemplate>
+    <DataTemplate x:Key="display_text_template">
+        <TextBlock Style="{StaticResource mylabelstyle_display}" Text="{Binding Path=StringValue}" />
+    </DataTemplate>
+    <DataTemplate x:Key="display_title_template">
+        <TextBlock Style="{StaticResource mylabelstyle_display}" Text="{Binding Path=StringValue}"
+                   FontWeight="Bold" FontSize="16"/>
+    </DataTemplate>
+    <DataTemplate x:Key="display_double_template">
+        <TextBlock Style="{StaticResource mylabelstyle_display}" 
+                   Text="{Binding Path=DoubleValue,Converter={StaticResource double_converter}}" />
+    </DataTemplate>
+    <DataTemplate x:Key="display_index_template">
+        <TextBlock Style="{StaticResource mylabelstyle_display}" 
+                   Text="{Binding Path=IntValue,Converter={StaticResource index_converter}}" />
+    </DataTemplate>
+    <DataTemplate x:Key="display_image_template">
+        <Image Source="{Binding Path=DataBytes,Converter={StaticResource image_converter}}" Stretch="Uniform" Height="32"
+               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5"/>
+    </DataTemplate>
+    <DataTemplate x:Key="display_datatemplate">
+        <ItemsControl ItemsSource="{Binding}" ItemTemplateSelector="{StaticResource display_templateselector}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </DataTemplate>
+    <!-- =============================-->
+    <DataTemplate x:Key="photo_image_template">
+        <StackPanel Orientation="Horizontal">
+            <Image Source="{Binding Path=DataBytes,Converter={StaticResource image_converter}}" Stretch="Uniform" Height="32"
+               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5"/>
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=Name}"
+                   FontWeight="Bold"/>
+        </StackPanel>
+    </DataTemplate>
+    <!-- =================================================-->
+    <DataTemplate x:Key="cell_sum_template">
+        <Ellipse Width="{Binding Path=Diameter}"
+                       Height="{Binding Path=Diameter}"
+                       Margin="0,0,0,0"
+                       Fill="{StaticResource sum_brush}"
+                      VerticalAlignment="Center" HorizontalAlignment="Center"
+                       />
+    </DataTemplate>
+    <DataTemplate x:Key="cell_var_template">
+        <TextBlock Width="{Binding Path=TotalWidth}" Text="{Binding Path=Text}"
+                       Margin="0,0,0,0"
+                       VerticalAlignment="Center" HorizontalAlignment="Left"
+                       >
+            <TextBlock.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-90"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </TextBlock.RenderTransform>
+        </TextBlock>
+    </DataTemplate>
+    <DataTemplate x:Key="cell_indiv_template">
+        <TextBlock Width="{Binding Path=TotalWidth}" Text="{Binding Path=Text}"
+                       Margin="0,0,0,0"
+                       VerticalAlignment="Center" HorizontalAlignment="Left"
+                       />
+    </DataTemplate>
+    <DataTemplate x:Key="cell_inf_template">
+        <Rectangle Width="{Binding Path=TotalWidth}"
+                       Height="{Binding Path=InfHeight}"
+                       Margin="0,0,0,0"
+                       Fill="{StaticResource inf_brush}"
+                   Stroke="Black"
+                   VerticalAlignment="Bottom"
+                       />
+    </DataTemplate>
+    <DataTemplate x:Key="cell_sup_template">
+        <StackPanel Orientation="Vertical" Width="{Binding Path=TotalWidth}">
+            <Rectangle Width="{Binding Path=TotalWidth}"
+                       Height="{Binding Path=SupHeight}"
+                       Margin="0,0,0,0"
+                       Fill="{StaticResource sup_brush}"
+                       Stroke="Black"
+                       />
+            <Rectangle Width="{Binding Path=TotalWidth}"
+                       Height="{Binding Path=InfHeight}"
+                       Margin="0,0,0,0"
+                       Fill="{StaticResource inf_brush}"
+                       Stroke="Black"
+                       VerticalAlignment="Bottom"
+                       />
+        </StackPanel>
+    </DataTemplate>
+    <DataTemplate x:Key="cell_grayscale_template">
+        <Rectangle Width="{Binding Path=TotalWidth}"
+                       Height="{Binding Path=InfHeight}"
+                       Margin="0,0,0,0"
+                   Stroke="Black" VerticalAlignment="Bottom"
+                       Fill="{Binding Path=Ratio, Converter={StaticResource matgrayscaleConverter }}"
+                       />
+    </DataTemplate>
+    <DataTemplate x:Key="cell_default_template">
+        <Rectangle Width="{Binding Path=TotalWidth}"
+                       Height="{Binding Path=TotalHeight}"
+                       Margin="0,0,0,0"
+                       Fill="White"
+                       />
+    </DataTemplate>
+    <DataTemplate x:Key="matdata_datatemplate">
+        <ItemsControl ItemsSource="{Binding}" ItemTemplateSelector="{StaticResource cell_templateselector}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </DataTemplate>
+    <Style x:Key="mylabelstyle"  TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontStyle" Value="Italic" />
+        <Setter Property="Margin" Value="2,2" />
+    </Style>
+    <Style x:Key="mytextboxstyle" TargetType="TextBox" >
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Width" Value="150" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Margin" Value="5,5" />
+    </Style>
+    <Style x:Key="myradiostyle" TargetType="RadioButton">
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="5,5" />
+    </Style>
+    <Style x:Key="mycheckboxstyle" TargetType="CheckBox">
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="5,5" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="mygroupstyle" TargetType="GroupBox">
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontStyle" Value="Italic" />
+        <Setter Property="Margin" Value="5,5" />
+    </Style>
+    <Style x:Key="mycomboboxstyle" TargetType="ComboBox">
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Margin" Value="5,5" />
+    </Style>
+    <Style x:Key="mylistboxstyle" TargetType="ListBox">
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Margin" Value="5,5" />
+    </Style>
+    <Style x:Key="mybuttonstyle" TargetType="Button">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontFamily" Value="Verdana" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="5,5" />
+        <Setter Property="Background" Value="Azure"/>
+        <Setter Property="Width" Value="Auto" />
+        <Setter Property="Height" Value="25" />
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="StatApp.Controles.PhotoAssocUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" DataContextChanged="UserControl_DataContextChanged" Loaded="UserControl_Loaded" 
+             >
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5,0">
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=DataSetName,FallbackValue='Dataset'}" />
+            <Button x:Name="buttonCommitChanges" Style="{StaticResource mybuttonstyle}" Margin="20,0" Click="buttonCommitChanges_Click">Valider les changements</Button>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Margin="5,0">
+            <StackPanel Orientation="Horizontal" Margin="5,0">
+                <TextBlock Style="{StaticResource mylabelstyle}" Text="Filtre images:" />
+                <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=SearchString}" Width="400" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource mylabelstyle}" Text="Variable IDs:" />
+                <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=IdsVarName}" Width="100" />
+                <TextBlock Style="{StaticResource mylabelstyle}" Text="Variable Noms:" />
+                <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=NamesVarName}" Width="100" />
+                <TextBlock Style="{StaticResource mylabelstyle}" Text="Variable Images:" />
+                <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=PhotosVarName}" Width="100" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <ListBox x:Name="listboxIndivs" Style="{StaticResource mylistboxstyle}" ItemsSource="{Binding Path=DisplayIndivs}" Margin="5,5"
+                         SelectionMode="Single" ItemTemplate="{StaticResource display_datatemplate}" Width="320" Height="270"
+                         SelectionChanged="listboxIndivs_SelectionChanged" />
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path= PhotosStatusString}" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="buttonPrev" Style="{StaticResource mybuttonstyle}" Click="buttonPrev_Click"><![CDATA[<<]]></Button>
+                        <Button x:Name="buttonNext" Style="{StaticResource mybuttonstyle}" Click="buttonNext_Click">
+                            <![CDATA[>>]]>
+                        </Button>
+                    </StackPanel>
+                    <ListBox x:Name="listboxPhotos" Style="{StaticResource mylistboxstyle}" ItemsSource="{Binding Path=Photos}"
+                             ItemTemplate="{StaticResource display_datatemplate}" Margin="5,5" Height="220"
+                             SelectionMode="Single" Width="140" SelectionChanged="listboxPhotos_SelectionChanged" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="buttonAssociate" Style="{StaticResource mybuttonstyle}" Click="buttonAssociate_Click">Associer</Button>
+                        <Button x:Name="buttonDissociate" Style="{StaticResource mybuttonstyle}" Click="buttonDissociate_Click">Dissocier</Button>
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Index" HorizontalAlignment="Center" />
+                    <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=CurrentIndex,Converter={StaticResource index_converter}}" IsReadOnly="True" Width="80" />
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="ID" HorizontalAlignment="Center" />
+                    <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=CurrentIdString}"  Width="80" />
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Nom" HorizontalAlignment="Center" />
+                    <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=CurrentNameString}"  Width="140" />
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Image actuelle" HorizontalAlignment="Center" />
+                    <Image  Source="{Binding Path=IndivCurrentPhotoData,Converter={StaticResource image_converter}}"
+                           HorizontalAlignment="center"
+                   Height="40" Stretch="Uniform" />
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Image candidate" HorizontalAlignment="Center" />
+                    <Image  Source="{Binding Path=CurrentPhotoData,Converter={StaticResource image_converter}}"
+                           HorizontalAlignment="center"
+                   Height="40" Stretch="Uniform" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</UserControl>

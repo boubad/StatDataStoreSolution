@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="StatApp.Controles.DisplayItemsUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Loaded="UserControl_Loaded" DataContextChanged="UserControl_DataContextChanged" 
+             >
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Button x:Name="buttonCopy" Style="{StaticResource mybuttonstyle}" Click="buttonCopy_Click">Copier</Button>
+                    <Button x:Name="buttonExport" Style="{StaticResource mybuttonstyle}" Margin="5,5" Click="buttonExport_Click">Enregistrer sous...</Button>
+                </StackPanel>
+                <ItemsControl Grid.Row="1" x:Name="itemsArray" ItemsSource="{Binding}"  ItemTemplate="{DynamicResource display_datatemplate}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

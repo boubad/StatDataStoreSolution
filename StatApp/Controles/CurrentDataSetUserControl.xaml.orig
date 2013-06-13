@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="StatApp.Controles.CurrentDataSetUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StatApp.Controles"
+             mc:Ignorable="d" DataContextChanged="UserControl_DataContextChanged" Loaded="UserControl_Loaded" 
+             >
+    <TabControl>
+        <TabItem Header="DataSet">
+            <local:StatDataSetUserControl  x:Name="controlStatDataSet"/>
+        </TabItem>
+        <TabItem Header="Valeurs" x:Name="controlInitialData">
+            <local:DisplayItemsUserControl  DataContext="{Binding Path=InitialData}" Margin="5,5" />
+        </TabItem>
+        <TabItem Header="Statistiques" x:Name="controlStats">
+            <local:DisplayItemsUserControl  DataContext="{Binding Path=VariablesInfos}" Margin="5,5" />
+        </TabItem>
+        <TabItem Header="Corrélations"  x:Name="controlCorrelations">
+            <local:DisplayItemsUserControl  DataContext="{Binding Path=CorrelationsDisplay}" Margin="5,5" />
+        </TabItem>
+        <TabItem Header="Edition" x:Name="controlEdit">
+            <local:VariableValuesUserControl />
+        </TabItem>
+<<<<<<< HEAD
+        <TabItem Header="Infos">
+            <local:PhotoAssocUserControl x:Name="assocControl" DataContext="{Binding Path=PhotosAssocModelView}"/>
+=======
+        <TabItem Header="Infos" x:Name="assocControl">
+            <local:PhotoAssocUserControl  DataContext="{Binding Path=PhotosAssocModelView}"/>
+>>>>>>> d065354a7ccf0e12ee4bfc37898dbae48f0e1436
+        </TabItem>
+    </TabControl>
+    
+</UserControl>

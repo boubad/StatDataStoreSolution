@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="statdataModel.Store" Alias="Self" Provider="System.Data.SqlServerCe.4.0" ProviderManifestToken="4.0" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityContainer Name="statdataModelStoreContainer">
+          <EntitySet Name="DbDataSet" EntityType="statdataModel.Store.DbDataSet" store:Type="Tables" />
+          <EntitySet Name="DbKey" EntityType="statdataModel.Store.DbKey" store:Type="Tables" />
+          <EntitySet Name="DbPhoto" EntityType="statdataModel.Store.DbPhoto" store:Type="Tables" />
+          <EntitySet Name="DbValue" EntityType="statdataModel.Store.DbValue" store:Type="Tables" />
+          <EntitySet Name="DbVariable" EntityType="statdataModel.Store.DbVariable" store:Type="Tables" />
+          <AssociationSet Name="FK_Value_Variable" Association="statdataModel.Store.FK_Value_Variable">
+            <End Role="DbVariable" EntitySet="DbVariable" />
+            <End Role="DbValue" EntitySet="DbValue" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Variable_DataSet" Association="statdataModel.Store.FK_Variable_DataSet">
+            <End Role="DbDataSet" EntitySet="DbDataSet" />
+            <End Role="DbVariable" EntitySet="DbVariable" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="DbDataSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="LastIndex" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="32" />
+          <Property Name="Description" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="DbKey">
+          <Key>
+            <PropertyRef Name="Nom" />
+          </Key>
+          <Property Name="Nom" Type="nvarchar" Nullable="false" MaxLength="100" />
+          <Property Name="Valeur" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DbPhoto">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="100" />
+          <Property Name="DataBytes" Type="image" />
+        </EntityType>
+        <EntityType Name="DbValue">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="VariableId" Type="int" Nullable="false" />
+          <Property Name="IndivIndex" Type="int" Nullable="false" />
+          <Property Name="DataStringValue" Type="nvarchar" MaxLength="32" />
+        </EntityType>
+        <EntityType Name="DbVariable">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="DataSetId" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="32" />
+          <Property Name="VarType" Type="nvarchar" Nullable="false" MaxLength="32" />
+          <Property Name="IsCategVar" Type="bit" Nullable="false" />
+          <Property Name="IsIdVar" Type="bit" Nullable="false" />
+          <Property Name="IsNameVar" Type="bit" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="100" />
+          <Property Name="IsImageVar" Type="bit" Nullable="false" />
+          <Property Name="IsInfoVar" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Value_Variable">
+          <End Role="DbVariable" Type="statdataModel.Store.DbVariable" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DbValue" Type="statdataModel.Store.DbValue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DbVariable">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="DbValue">
+              <PropertyRef Name="VariableId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Variable_DataSet">
+          <End Role="DbDataSet" Type="statdataModel.Store.DbDataSet" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DbVariable" Type="statdataModel.Store.DbVariable" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DbDataSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="DbVariable">
+              <PropertyRef Name="DataSetId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="statdataModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="statdataEntities" p1:LazyLoadingEnabled="true">
+          <EntitySet Name="DbDataSets" EntityType="statdataModel.DbDataSet" />
+          <EntitySet Name="DbKeys" EntityType="statdataModel.DbKey" />
+          <EntitySet Name="DbValues" EntityType="statdataModel.DbValue" />
+          <EntitySet Name="DbVariables" EntityType="statdataModel.DbVariable" />
+          <AssociationSet Name="FK_Variable_DataSet" Association="statdataModel.FK_Variable_DataSet">
+            <End Role="DbDataSet" EntitySet="DbDataSets" />
+            <End Role="DbVariable" EntitySet="DbVariables" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Value_Variable" Association="statdataModel.FK_Value_Variable">
+            <End Role="DbVariable" EntitySet="DbVariables" />
+            <End Role="DbValue" EntitySet="DbValues" />
+          </AssociationSet>
+          <EntitySet Name="DbPhotoes" EntityType="statdataModel.DbPhoto" />
+        </EntityContainer>
+        <EntityType Name="DbDataSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="LastIndex" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="32" Unicode="true" FixedLength="false" />
+          <Property Name="Description" Type="String" MaxLength="100" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="Variables" Relationship="statdataModel.FK_Variable_DataSet" FromRole="DbDataSet" ToRole="DbVariable" />
+        </EntityType>
+        <EntityType Name="DbKey">
+          <Key>
+            <PropertyRef Name="Nom" />
+          </Key>
+          <Property Name="Nom" Type="String" Nullable="false" MaxLength="100" Unicode="true" FixedLength="false" />
+          <Property Name="Valeur" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DbValue">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="VariableId" Type="Int32" Nullable="false" />
+          <Property Name="Index" Type="Int32" Nullable="false" />
+          <Property Name="Value" Type="String" MaxLength="32" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="Variable" Relationship="statdataModel.FK_Value_Variable" FromRole="DbValue" ToRole="DbVariable" />
+        </EntityType>
+        <EntityType Name="DbVariable">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="DataSetId" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="32" Unicode="true" FixedLength="false" />
+          <Property Name="VarType" Type="String" Nullable="false" MaxLength="32" Unicode="true" FixedLength="false" />
+          <Property Name="IsCateg" Type="Boolean" Nullable="false" />
+          <Property Name="IsId" Type="Boolean" Nullable="false" />
+          <Property Name="IsName" Type="Boolean" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="100" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="DataSet" Relationship="statdataModel.FK_Variable_DataSet" FromRole="DbVariable" ToRole="DbDataSet" />
+          <NavigationProperty Name="Values" Relationship="statdataModel.FK_Value_Variable" FromRole="DbVariable" ToRole="DbValue" />
+          <Property Type="Boolean" Name="IsImageVar" Nullable="false" />
+          <Property Type="Boolean" Name="IsInfoVar" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Variable_DataSet">
+          <End Role="DbDataSet" Type="statdataModel.DbDataSet" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DbVariable" Type="statdataModel.DbVariable" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DbDataSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="DbVariable">
+              <PropertyRef Name="DataSetId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Value_Variable">
+          <End Role="DbVariable" Type="statdataModel.DbVariable" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="DbValue" Type="statdataModel.DbValue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DbVariable">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="DbValue">
+              <PropertyRef Name="VariableId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="DbPhoto">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Type="Binary" Name="DataBytes" MaxLength="Max" FixedLength="false" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="statdataModelStoreContainer" CdmEntityContainer="statdataEntities">
+          <EntitySetMapping Name="DbDataSets">
+            <EntityTypeMapping TypeName="statdataModel.DbDataSet">
+              <MappingFragment StoreEntitySet="DbDataSet">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="LastIndex" ColumnName="LastIndex" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DbKeys">
+            <EntityTypeMapping TypeName="statdataModel.DbKey">
+              <MappingFragment StoreEntitySet="DbKey">
+                <ScalarProperty Name="Nom" ColumnName="Nom" />
+                <ScalarProperty Name="Valeur" ColumnName="Valeur" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DbValues">
+            <EntityTypeMapping TypeName="statdataModel.DbValue">
+              <MappingFragment StoreEntitySet="DbValue">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="VariableId" ColumnName="VariableId" />
+                <ScalarProperty Name="Index" ColumnName="IndivIndex" />
+                <ScalarProperty Name="Value" ColumnName="DataStringValue" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DbVariables">
+            <EntityTypeMapping TypeName="statdataModel.DbVariable">
+              <MappingFragment StoreEntitySet="DbVariable">
+                <ScalarProperty Name="IsInfoVar" ColumnName="IsInfoVar" />
+                <ScalarProperty Name="IsImageVar" ColumnName="IsImageVar" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="DataSetId" ColumnName="DataSetId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="VarType" ColumnName="VarType" />
+                <ScalarProperty Name="IsCateg" ColumnName="IsCategVar" />
+                <ScalarProperty Name="IsId" ColumnName="IsIdVar" />
+                <ScalarProperty Name="IsName" ColumnName="IsNameVar" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DbPhotoes">
+            <EntityTypeMapping TypeName="statdataModel.DbPhoto">
+              <MappingFragment StoreEntitySet="DbPhoto">
+                <ScalarProperty Name="DataBytes" ColumnName="DataBytes" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Aucun" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

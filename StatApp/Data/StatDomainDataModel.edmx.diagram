@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="1cb5b81b2e894168b1c0e1982ae20b9a" Name="Diagramme1">
+        <EntityTypeShape EntityType="statdataModel.DbDataSet" Width="1.5" PointX="0.75" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="statdataModel.DbKey" Width="1.5" PointX="0.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="statdataModel.DbValue" Width="1.5" PointX="5.25" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="statdataModel.DbVariable" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <AssociationConnector Association="statdataModel.FK_Variable_DataSet" ManuallyRouted="false" />
+        <AssociationConnector Association="statdataModel.FK_Value_Variable" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="statdataModel.DbPhoto" Width="1.5" PointX="5.25" PointY="4.625" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

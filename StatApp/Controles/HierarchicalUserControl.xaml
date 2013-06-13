@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="StatApp.Controles.HierarchicalUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
+             mc:Ignorable="d" DataContextChanged="UserControl_DataContextChanged" Loaded="UserControl_Loaded" 
+             >
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" Margin="5,5">
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="Lien:" HorizontalAlignment="Right" />
+            <ComboBox x:Name="comboboxLinks" Style="{StaticResource mycomboboxstyle}" ItemsSource="{Binding Path=LinkTypes}"
+                      SelectedItem="{Binding Path=CurrentLinkTypeString}" Width="150" />
+            <Button x:Name="buttonCompute" Style="{StaticResource mybuttonstyle}" Click="buttonCompute_Click">Calculer</Button>
+            <Button x:Name="buttonCancel" Style="{StaticResource mybuttonstyle}" Click="buttonCancel_Click">Annuler</Button>
+            <Button x:Name="buttonAdd" Style="{StaticResource mybuttonstyle}" Click="buttonAdd_Click">Ajouter au jeu de données</Button>
+        </StackPanel>
+        <oxy:Plot Grid.Column="1" Model="{Binding Path=HierarShowModel}" MinWidth="200" MinHeight="200" Margin="5,5"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    </DockPanel>
+</UserControl>

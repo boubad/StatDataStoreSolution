@@ -1,0 +1,68 @@
+<UserControl x:Class="StatApp.Controles.ClusterizeUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StatApp.Controles"
+             mc:Ignorable="d" Loaded="UserControl_Loaded" DataContextChanged="UserControl_DataContextChanged" 
+             >
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Left" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="Variables" />
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Disponibles" />
+                        <ListBox x:Name="srcListBox" SelectionMode="Extended" ItemsSource="{Binding Path=LeftVariables}"
+                         Style="{StaticResource mylistboxstyle}" Width="120" Height="100" SelectionChanged="srcListBox_SelectionChanged"   />
+                        <Button x:Name="buttonAdd" Style="{StaticResource mybuttonstyle}" VerticalAlignment="Center" Width="50" Click="buttonAdd_Click">
+                            <![CDATA[>>]]>
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Actuelles" />
+                        <ListBox x:Name="destListBox" SelectionMode="Extended"  ItemsSource="{Binding Path=CurrentVariables}"
+                         Style="{StaticResource mylistboxstyle}"  Width="120" Height="100" SelectionChanged="destListBox_SelectionChanged"  />
+                        <Button x:Name="buttonRemove" Style="{StaticResource mybuttonstyle}" VerticalAlignment="Center"  Width="50" Click="buttonRemove_Click">
+                            <![CDATA[<<]]>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+                <TextBlock Style="{StaticResource mylabelstyle}" Text="Transformation" />
+                <ComboBox x:Name="comboboxMatriceMode" Style="{StaticResource mycomboboxstyle}" Width="220" SelectedIndex="0" SelectionChanged="comboboxMatriceMode_SelectionChanged">
+                    <ComboBoxItem Tag="AUCUN">Aucune transformation</ComboBoxItem>
+                    <ComboBoxItem Tag="NORMALIZE">Centrées réduites</ComboBoxItem>
+                    <ComboBoxItem Tag="PROFIL">Profils</ComboBoxItem>
+                    <ComboBoxItem Tag="RANK">Rangs</ComboBoxItem>
+                </ComboBox>
+                
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Nombre de clusters:" HorizontalAlignment="Right" />
+                    <TextBox Style="{StaticResource mytextboxstyle}" Width="60" Text="{Binding Path=ClustersCount,Converter={StaticResource int_converter}}" /> 
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Nombre d'itérations:" HorizontalAlignment="Right" />
+                    <TextBox Style="{StaticResource mytextboxstyle}" Width="60" Text="{Binding Path=IterationsCount,Converter={StaticResource int_converter}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Variable Y" />
+                        <ListBox x:Name="listboxYVar" Style="{StaticResource mylistboxstyle}" ItemsSource="{Binding Path= NumVariables}"
+                     SelectionMode="Single" SelectedItem="{Binding Path=CurrentYVariable}" Height="100" Width="130" />
+                        <TextBlock Style="{StaticResource mylabelstyle}" FontWeight="Bold" Text="{Binding Path=YVarName}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Variable X" />
+                        <ListBox x:Name="listboxXVar" Style="{StaticResource mylistboxstyle}" ItemsSource="{Binding Path= NumVariables}"
+                     SelectionMode="Single" SelectedItem="{Binding Path=CurrentXVariable}" Height="100" Width="130" />
+                        <TextBlock Style="{StaticResource mylabelstyle}" FontWeight="Bold" Text="{Binding Path=XVarName}" />
+                    </StackPanel>
+                </StackPanel>
+                <CheckBox x:Name="checkboxCateg" Style="{StaticResource mycheckboxstyle}" IsThreeState="False" Click="checkboxCateg_Click">Catégorie</CheckBox>
+                <ComboBox x:Name="comboboxCateg" Style="{StaticResource mycomboboxstyle}" ItemsSource="{Binding Path=AllCategVariables}"
+                      SelectedItem="{Binding Path=CurrentCategVariable}" Width="130" />
+            </StackPanel>
+        </StackPanel>
+        <local:ClassificationUserControl  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    </DockPanel>
+</UserControl>

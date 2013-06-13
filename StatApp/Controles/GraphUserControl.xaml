@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="StatApp.Controles.GraphUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StatApp.Controles"
+             mc:Ignorable="d" 
+             >
+    <TabControl>
+        <TabItem Header="Distribution">
+            <local:DistribUserControl  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        </TabItem>
+        <TabItem Header="Corrélations">
+            <local:CorrelationUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </TabItem>
+        <TabItem Header="Boîtes de Tukey">
+            <local:BoxPlotUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </TabItem>
+        
+        
+    </TabControl>
+</UserControl>

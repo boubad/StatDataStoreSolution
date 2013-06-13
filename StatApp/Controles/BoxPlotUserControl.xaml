@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="StatApp.Controles.BoxPlotUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" Loaded="UserControl_Loaded">
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Left" Orientation="Vertical">
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="Variables numériques" />
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Disponibles" />
+                        <ListBox x:Name="srcListBox" SelectionMode="Extended" ItemsSource="{Binding Path=LeftNumVariables}"
+                         Style="{StaticResource mylistboxstyle}" MinWidth="100" MaxHeight="300" SelectionChanged="srcListBox_SelectionChanged_1"  />
+                        <Button x:Name="buttonAdd" Style="{StaticResource mybuttonstyle}" VerticalAlignment="Center" Width="50" Click="buttonAdd_Click_1">
+                            <![CDATA[>>]]>
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Actuelles" />
+                        <ListBox x:Name="destListBox" SelectionMode="Extended"  ItemsSource="{Binding Path=NumVariables}"
+                         Style="{StaticResource mylistboxstyle}"  MinWidth="100" MaxHeight="300" SelectionChanged="destListBox_SelectionChanged_1" />
+                        <Button x:Name="buttonRemove" Style="{StaticResource mybuttonstyle}" VerticalAlignment="Center"  Width="50" Click="buttonRemove_Click_1">
+                            <![CDATA[<<]]>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <oxy:Plot x:Name="boxplot" Model="{Binding Path=BoxPlotModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                  MinHeight="350" MinWidth="550">
+            <!--
+            <oxy:Plot.Axes>
+                <oxy:LinearAxis Position="Left" />
+                <oxy:LinearAxis Position="Bottom" MinimumPadding="0.1" MaximumPadding="0.1" />
+            </oxy:Plot.Axes>
+            -->
+        </oxy:Plot>
+    </DockPanel>
+</UserControl>

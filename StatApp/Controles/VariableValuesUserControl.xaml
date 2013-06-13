@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="StatApp.Controles.VariableValuesUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Loaded="UserControl_Loaded" 
+             >
+    <DockPanel>
+        <ListBox DockPanel.Dock="Left" x:Name="listboxVariables" Style="{StaticResource mylistboxstyle}" Width="140" Margin="5,5"
+                 ItemsSource="{Binding Path=Variables}" SelectedItem="{Binding Path=CurrentVariable}" Height="470" SelectionChanged="listboxVariables_SelectionChanged" />
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" HorizontalAlignment="Center">
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=DataSetName,FallbackValue='Ensemble de données'}" />
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=VariableName,FallbackValue='Variable'}" FontWeight="Bold" />
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=VariableType,FallbackValue='Variable type'}" />
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=ValuesStatus,FallbackValue='status line'}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5,5">
+                <Button x:Name="buttonRefresh" Style="{StaticResource mybuttonstyle}" Click="buttonRefresh_Click">Rafraîchir</Button>
+                <Button x:Name="buttonAdd" Style="{StaticResource mybuttonstyle}" Click="buttonAdd_Click">Ajouter</Button>
+                <Button x:Name="buttonSave" Style="{StaticResource mybuttonstyle}" Click="buttonSave_Click">Enregistrer</Button>
+                <Button x:Name="buttonRemove" Style="{StaticResource mybuttonstyle}" Click="buttonRemove_Click">Supprimer</Button>
+                <Button x:Name="buttonPrevPage" Style="{StaticResource mybuttonstyle}" Click="buttonPrevPage_Click">
+                    <![CDATA[<<]]>
+                </Button>
+                <Button x:Name="buttonNextPage" Style="{StaticResource mybuttonstyle}" Click="buttonNextPage_Click">
+                    <![CDATA[>>]]>
+                </Button>
+            </StackPanel>
+            <DataGrid x:Name="valuesGrid" Margin="5,5" Height="350" HorizontalAlignment="Left"
+                              ItemsSource="{Binding Path=Values}" AutoGenerateColumns="False" SelectionMode="Extended"
+                              CanUserAddRows="False" CanUserDeleteRows="False" VerticalAlignment="Stretch" SelectionChanged="valuesGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Index" Width="80" Binding="{Binding Path=Index}" IsReadOnly="False">
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Valeur" Width="120" Binding="{Binding Path=DataStringValue}" IsReadOnly="False">
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+
+            </DataGrid>
+        </StackPanel>
+    </DockPanel>
+</UserControl>

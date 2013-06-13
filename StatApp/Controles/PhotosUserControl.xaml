@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="StatApp.Controles.PhotosUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StatApp.Controles"
+             mc:Ignorable="d" 
+             Loaded="UserControl_Loaded" DataContextChanged="UserControl_DataContextChanged">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Left" Margin="5,5" Orientation="Vertical">
+            <Button x:Name="buttonImportAll" Style="{StaticResource mybuttonstyle}" Width="100" Click="buttonImportAll_Click">Importer...</Button>
+            <ProgressBar x:Name="progressBar" Width="120" Height="15" />
+            <Button x:Name="buttonCancel" Style="{StaticResource mybuttonstyle}" Width="100" Click="buttonCancel_Click">Annuler</Button>
+            <TextBlock Style="{StaticResource mylabelstyle}" Text="{Binding Path=ValuesStatus}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="buttonPrevPage" Style="{StaticResource mybuttonstyle}"  Click="buttonPrevPage_Click">
+                        <![CDATA[<<]]>
+                    </Button>
+                    <Button x:Name="buttonNextPage" Style="{StaticResource mybuttonstyle}"  Click="buttonNextPage_Click">
+                        <![CDATA[>>]]>
+                    </Button>
+                </StackPanel>
+                <ListBox x:Name="listboxPhotos" Style="{StaticResource mylistboxstyle}" ItemsSource="{Binding Path=Photos}"
+                     SelectedItem="{Binding Path=CurrentPhoto}" SelectionMode="Single" Width="200" Height="250" HorizontalAlignment="Left" />
+        </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="5,5"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Grid DataContext="{Binding Path=CurrentPhoto}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Column="0" Grid.Row="0" Style="{StaticResource mylabelstyle}" Text="Identifiant:" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="1" Grid.Row="0" Style="{StaticResource mylabelstyle}" Text="{Binding Path=Id,Converter={StaticResource int_converter}}"
+                           HorizontalAlignment="Left"/>
+                    <TextBlock Grid.Column="0" Grid.Row="1" Style="{StaticResource mylabelstyle}" Text="Nom:" HorizontalAlignment="Right" />
+                    <TextBox Grid.Column="1" Grid.Row="1" Style="{StaticResource mytextboxstyle}" Width="250" Text="{Binding Path=Name}" />
+                </Grid>
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="buttonRefresh" Style="{StaticResource mybuttonstyle}" Click="buttonRefresh_Click">Refresh</Button>
+                    <Button x:Name="buttonNew" Style="{StaticResource mybuttonstyle}"  Click="buttonNew_Click">Nouveau</Button>
+                    <Button x:Name="buttonBrowse" Style="{StaticResource mybuttonstyle}"  Click="buttonBrowse_Click">Parcourir...</Button>
+                    <Button x:Name="buttonSave" Style="{StaticResource mybuttonstyle}"  Click="buttonSave_Click">Enregistrer</Button>
+                    <Button x:Name="buttonRemove" Style="{StaticResource mybuttonstyle}"  Click="buttonRemove_Click">Supprimer</Button>
+                </StackPanel>
+                <StackPanel DataContext="{Binding Path=CurrentPhoto}">
+                    <Image Margin="5,5" Source="{Binding Path=DataBytes,Converter={StaticResource image_converter}}" HorizontalAlignment="Stretch"
+                   Height="300" Stretch="Uniform" />
+                </StackPanel>
+            </StackPanel>
+    </DockPanel>
+</UserControl>

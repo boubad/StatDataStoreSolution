@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="StatApp.Controles.ClassificationUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StatApp.Controles"
+             mc:Ignorable="d" Loaded="UserControl_Loaded" DataContextChanged="UserControl_DataContextChanged">
+    <DockPanel  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <CheckBox x:Name="checkboxPoints" Style="{StaticResource mycheckboxstyle}" Click="checkboxPoints_Click">Points</CheckBox>
+            <CheckBox x:Name="checkboxLabels" Style="{StaticResource mycheckboxstyle}" Click="checkboxLabels_Click">Etiquettes</CheckBox>
+            <CheckBox x:Name="checkboxImages" Style="{StaticResource mycheckboxstyle}" Click="checkboxImages_Click">Images</CheckBox>
+        </StackPanel>
+        <TabControl>
+           
+            <TabItem Header="Category Utility" x:Name="controlUtility">
+                <local:CategorryUtilityUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </TabItem>
+            <TabItem Header="K-Means" x:Name="controlKMeans">
+                <local:KMeansUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </TabItem>
+            <TabItem Header="Classification hiérachique" x:Name="controlHierar">
+                <local:HierarchicalUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </TabItem>
+            <TabItem Header="Arrangement" x:Name="controlArrange">
+                <local:RowArrangeUserControl  />
+            </TabItem>
+            <TabItem Header="Matrices" x:Name="controlMatrices">
+                <local:MatriceUserControl HorizontalAlignment="Left" VerticalAlignment="Top"  />
+            </TabItem>
+            <TabItem Header="Clusters" x:Name="controlClusters">
+                <local:DisplayItemsUserControl DataContext="{Binding Path=ClustersData}"
+                                               Margin="5,5"  HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            </TabItem>
+            <TabItem Header="Data" x:Name="controlData">
+                <local:DisplayItemsUserControl DataContext="{Binding Path=OrdDisplayData}" Margin="5,5" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>
+    
