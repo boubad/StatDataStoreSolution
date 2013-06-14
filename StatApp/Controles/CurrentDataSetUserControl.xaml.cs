@@ -41,6 +41,10 @@ namespace StatApp.Controles
         private void myUpdateUI()
         {
             var p = getModel();
+            if (p == null)
+            {
+                return;
+            }
             bool bOk = (p != null) && (!p.IsBusy);
             this.controlCorrelations.IsEnabled = bOk && (p.CorrelationsDisplay.Count > 1);
             this.controlEdit.IsEnabled = bOk && (p.CurrentVariable != null) && (p.CurrentStatDataSet != null) && p.CurrentStatDataSet.IsValid;
@@ -48,6 +52,7 @@ namespace StatApp.Controles
             this.controlStatDataSet.IsEnabled = bOk && (p.DataService != null);
             this.controlStats.IsEnabled = bOk && (p.VariablesInfos.Count > 1);
             this.assocControl.IsEnabled = bOk && (p.AllIndividus.Count > 0);
+
         }// myUpdateUI
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -61,6 +66,31 @@ namespace StatApp.Controles
         void m_model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             String name = e.PropertyName;
+            var p = getModel();
+            if (p == null)
+            {
+                return;
+            }
+            if (name == "CurrentStatDataSet")
+            {
+                bool bVisible = ((p.CurrentStatDataSet != null) && p.CurrentStatDataSet.IsValid);
+                if (bVisible)
+                {
+                    this.controlCorrelations.Visibility = Visibility.Visible;
+                    this.controlEdit.Visibility = Visibility.Visible;
+                    this.controlInitialData.Visibility = Visibility.Visible;
+                    this.controlStats.Visibility = Visibility.Visible;
+                    this.assocControl.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    this.controlCorrelations.Visibility = Visibility.Hidden;
+                    this.controlEdit.Visibility = Visibility.Hidden;
+                    this.controlInitialData.Visibility = Visibility.Hidden;
+                    this.controlStats.Visibility = Visibility.Hidden;
+                    this.assocControl.Visibility = Visibility.Hidden;
+                }
+            }// CurrentStatDataSet
             foreach (var s in TAB_NAMES)
             {
                 if (s == name)

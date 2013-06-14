@@ -5,91 +5,100 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" Loaded="UserControl_Loaded" DataContextChanged="UserControl_DataContextChanged" 
              >
-    <StackPanel Orientation="Horizontal"  VerticalAlignment="Stretch">
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                <ProgressBar x:Name="progressbar" Width="100" Height="10" HorizontalAlignment="Left" />
-                <Button x:Name="buttonCancel" Style="{StaticResource mybuttonstyle}" Click="buttonCancel_Click">Annuler</Button>
-                <Button x:Name="buttonImport" Style="{StaticResource mybuttonstyle}" Click="buttonImport_Click">Import...</Button>
-                <Button x:Name="buttonExport" Style="{StaticResource mybuttonstyle}" Click="buttonExport_Click">Export...</Button>
-                <Button x:Name="buttonRefresh" Style="{StaticResource mybuttonstyle}" Click="buttonRefresh_Click">Rafraîchir</Button>
-                <Button x:Name="buttonSave" Style="{StaticResource mybuttonstyle}" Click="buttonSave_Click">Enregistrer</Button>
-                <Button x:Name="buttonRemove" Style="{StaticResource mybuttonstyle}" Click="buttonRemove_Click">Supprimer</Button>
-            </StackPanel>
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" DataContext="{Binding Path=CurrentStatDataSet}">
-                <TextBlock Style="{StaticResource mylabelstyle}" Text="Nom" />
-                <TextBox Style="{StaticResource mytextboxstyle}"
+    <TabControl>
+        <TabItem Header="Ensemble de données">
+            <StackPanel Orientation="Horizontal"  VerticalAlignment="Stretch">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <ProgressBar x:Name="progressbar" Width="200" Height="10" HorizontalAlignment="Left" />
+                        <Button x:Name="buttonCancel" Style="{StaticResource mybuttonstyle}" Click="buttonCancel_Click">Annuler</Button>
+                        <Button x:Name="buttonImport" Style="{StaticResource mybuttonstyle}" Click="buttonImport_Click">Import...</Button>
+                        <Button x:Name="buttonExport" Style="{StaticResource mybuttonstyle}" Click="buttonExport_Click">Export...</Button>
+                        <Button x:Name="buttonRefresh" Style="{StaticResource mybuttonstyle}" Click="buttonRefresh_Click">Rafraîchir</Button>
+                        <Button x:Name="buttonSave" Style="{StaticResource mybuttonstyle}" Click="buttonSave_Click">Enregistrer</Button>
+                        <Button x:Name="buttonRemove" Style="{StaticResource mybuttonstyle}" Click="buttonRemove_Click">Supprimer</Button>
+                    </StackPanel>
+                    <StackPanel x:Name="panelCurrentStatDataSet" Orientation="Vertical" HorizontalAlignment="Center" DataContext="{Binding Path=CurrentStatDataSet}">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Nom" />
+                        <TextBox Style="{StaticResource mytextboxstyle}" Width="300"
                  Text="{Binding Path=Name}"/>
-                <TextBlock Style="{StaticResource mylabelstyle}" Text="Description" />
-                <TextBox Style="{StaticResource mytextboxstyle}"
-                 Text="{Binding Path=Description}" Height="120"   AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Description" />
+                        <TextBox Style="{StaticResource mytextboxstyle}"
+                 Text="{Binding Path=Description}" Height="120" Width="300"  AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
-        <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" x:Name="panelVariables">
-            <TextBlock Style="{StaticResource mylabelstyle}" Text="Variables" />
-            <ListBox x:Name="listboxVariables"  VerticalAlignment="Stretch" SelectionMode="Single"
-                     Width="120" ItemsSource="{Binding Path=Variables}" SelectedItem="{Binding Path=CurrentVariable}"
+        </TabItem>
+        <TabItem Header="Variables" x:Name="controlAllVariables">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" x:Name="panelVariables">
+                    <TextBlock Style="{StaticResource mylabelstyle}" Text="Variables" />
+                    <ListBox x:Name="listboxVariables"  VerticalAlignment="Stretch" SelectionMode="Single"
+                     Width="220" ItemsSource="{Binding Path=Variables}" SelectedItem="{Binding Path=CurrentVariable}"
                      Height="390" Style="{StaticResource mylistboxstyle}"/>
-        </StackPanel>
-        <StackPanel x:Name="currentVariablePanel" Orientation="Horizontal"
+                </StackPanel>
+                <StackPanel x:Name="currentVariablePanel" Orientation="Horizontal"
                     Margin="5,5" DataContext="{Binding Path=CurrentVariable}" VerticalAlignment="Stretch">
-            <StackPanel Orientation="Vertical" VerticalAlignment="Stretch">
-                <TextBlock Style="{StaticResource mylabelstyle}" Text="Nom Variable" />
-                <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=Name}" />
-                <ComboBox x:Name="comboboxTypes" ItemsSource="{Binding Path=DataTypes}" SelectedItem="{Binding Path=DataType}" MinWidth="60"
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch">
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Nom Variable" />
+                        <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=Name}" Width="200" />
+                        <ComboBox x:Name="comboboxTypes" ItemsSource="{Binding Path=DataTypes}" SelectedItem="{Binding Path=DataType}" MinWidth="60"
                               Style="{StaticResource mycomboboxstyle}"/>
-                <TextBlock Style="{StaticResource mylabelstyle}" Text="Genre Variable" />
-                <CheckBox Style="{StaticResource mycheckboxstyle}"  IsChecked="{Binding Path=IsCategVar}">Catégorielle</CheckBox>
-                <CheckBox Style="{StaticResource mycheckboxstyle}"  IsChecked="{Binding Path=IsNumVar}">Numérique</CheckBox>
-                <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsIdVar}">Id des individus</CheckBox>
-                <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsNameVar}">Nom des individus</CheckBox>
-                <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsInfoVar}">Information</CheckBox>
-                <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsImageVar}">Image</CheckBox>
-                <ListBox x:Name="listboxCategs" Margin="5,5" DataContext="{Binding Path=Info}" Height="140" ItemsSource="{Binding Path=Values}" />
-            </StackPanel>
-            <StackPanel Orientation="Vertical" VerticalAlignment="Stretch">
-               
-                <TextBlock Style="{StaticResource mylabelstyle}" Text="Description" />
-                <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=Description}" Height="130"
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Genre Variable" />
+                        <CheckBox Style="{StaticResource mycheckboxstyle}"  IsChecked="{Binding Path=IsCategVar}">Catégorielle</CheckBox>
+                        <CheckBox Style="{StaticResource mycheckboxstyle}"  IsChecked="{Binding Path=IsNumVar}">Numérique</CheckBox>
+                        <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsIdVar}">Id des individus</CheckBox>
+                        <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsNameVar}">Nom des individus</CheckBox>
+                        <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsInfoVar}">Information</CheckBox>
+                        <CheckBox Style="{StaticResource mycheckboxstyle}" IsChecked="{Binding Path=IsImageVar}">Image</CheckBox>
+                        <ListBox x:Name="listboxCategs" Margin="5,5" DataContext="{Binding Path=Info}" Height="140" ItemsSource="{Binding Path=Values}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch">
+
+                        <TextBlock Style="{StaticResource mylabelstyle}" Text="Description" />
+                        <TextBox Style="{StaticResource mytextboxstyle}" Text="{Binding Path=Description}" Height="130" Width="250"
                          AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
-                <Grid x:Name="gridNumInfo" DataContext="{Binding Path=Info}" HorizontalAlignment="Center" Margin="5,5" VerticalAlignment="Stretch">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Taille: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=TotalString}" HorizontalAlignment="Left"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Manquants: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MissingString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Borne Inf.: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MinString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Borne Sup.: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MaxString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Moyenne: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MeanString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Médiane: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MedianString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Ecart-type: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=DeviationString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Dissymétrie: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=SkewnessString}" HorizontalAlignment="Left" />
-                    <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Applatissement: " HorizontalAlignment="Right" />
-                    <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=FlatnessString}" HorizontalAlignment="Left" />
-                </Grid>
-                <Button x:Name="buttonSaveVariable" Style="{StaticResource mybuttonstyle}" Click="buttonSaveVariable_Click">Enregistrer variable</Button>
-                <Button x:Name="buttonRemoveVariable" Style="{StaticResource mybuttonstyle}" Click="buttonRemoveVariable_Click">Supprimer variable</Button>
+                        <Grid x:Name="gridNumInfo" DataContext="{Binding Path=Info}" HorizontalAlignment="Center" Margin="5,5" VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Taille: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=TotalString}" HorizontalAlignment="Left"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Manquants: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MissingString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Borne Inf.: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MinString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Borne Sup.: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MaxString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Moyenne: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MeanString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Médiane: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=MedianString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Ecart-type: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=DeviationString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="7" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Dissymétrie: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=SkewnessString}" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="8" Grid.Column="0" Style="{StaticResource mylabelstyle}" Text="Applatissement: " HorizontalAlignment="Right" />
+                            <TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource mylabelstyle}" Text="{Binding Path=FlatnessString}" HorizontalAlignment="Left" />
+                        </Grid>
+                        <Button x:Name="buttonSaveVariable" Style="{StaticResource mybuttonstyle}" Click="buttonSaveVariable_Click">Enregistrer variable</Button>
+                        <Button x:Name="buttonRemoveVariable" Style="{StaticResource mybuttonstyle}" Click="buttonRemoveVariable_Click">Supprimer variable</Button>
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
-    </StackPanel>
+        </TabItem>
+    </TabControl>
+   
 </UserControl>

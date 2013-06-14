@@ -766,7 +766,23 @@ namespace StatApp.Controles
 
         void m_model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            var p = getModel();
+            if (p == null)
+            {
+                return;
+            }
             String name = e.PropertyName;
+            if (name == "CurrentStatDataSet")
+            {
+                if ((p.CurrentStatDataSet != null) && p.CurrentStatDataSet.IsValid && (p.CurrentStatDataSet.Variables.Count > 0))
+                {
+                    this.controlAllVariables.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    this.controlAllVariables.Visibility = Visibility.Hidden;
+                }
+            }// CurrentStatDataSet
             foreach (var s in TAB_NAMES)
             {
                 if (s == name)
