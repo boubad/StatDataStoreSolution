@@ -50,7 +50,7 @@ namespace StatApp.Controles
             }
             return pRet;
         }// getModel
-        private async void buttonCompute_Click(object sender, RoutedEventArgs e)
+        private void buttonCompute_Click(object sender, RoutedEventArgs e)
         {
             var model = getModel();
             if (model == null)
@@ -62,9 +62,8 @@ namespace StatApp.Controles
             m_cts = new CancellationTokenSource();
             this.buttonCancel.IsEnabled = true;
             model.IsBusy = true;
-            var xx = await TreeItem.Hierar(model, model.ClustersCount, model.LinkType, m_cts.Token);
+            model.UpdateClusters(model.ClassesCount, model.IterationsCount, m_cts.Token, null);
             m_cts = null;
-            model.HierarClusterSet = xx;
             this.buttonCancel.IsEnabled = false;
             this.buttonCompute.IsEnabled = true;
             this.buttonAdd.IsEnabled = true;

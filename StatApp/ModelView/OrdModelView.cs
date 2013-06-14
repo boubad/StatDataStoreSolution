@@ -27,6 +27,8 @@ namespace StatApp.ModelView
         private MatriceComputeMode[] TAB_MODES = new MatriceComputeMode[]{MatriceComputeMode.modeNothing,MatriceComputeMode.modeNormalize,
             MatriceComputeMode.modeProfil,MatriceComputeMode.modeRank};
         #region Instance Variables
+        private int[] m_pcolindex;
+        private int[] m_prowindex;
         private PlotModel m_rowarrangeplot;
         private DisplayItemsArray m_sortedindivsdata;
         private DisplayItemsArray m_clusterdata;
@@ -137,6 +139,44 @@ namespace StatApp.ModelView
             }
         }// RefreshComputeVariables
         #region Properties
+        public int[] ColIndexes
+        {
+            get
+            {
+                if (m_pcolindex == null)
+                {
+                    m_pcolindex = new int[0];
+                }
+                return m_pcolindex;
+            }
+            set
+            {
+                if (value != m_pcolindex)
+                {
+                    m_pcolindex = value;
+                    NotifyPropertyChanged("ColIndexes");
+                }
+            }
+        }// Colindexes
+        public int[] RowIndexes
+        {
+            get
+            {
+                if (m_prowindex == null)
+                {
+                    m_prowindex = new int[0];
+                }
+                return m_prowindex;
+            }
+            set
+            {
+                if (value != m_prowindex)
+                {
+                    m_prowindex = value;
+                    NotifyPropertyChanged("RowsIndexes");
+                }
+            }
+        }// Rowsindexes
         public PlotModel CombinedShowModel
         {
             get
@@ -317,7 +357,7 @@ namespace StatApp.ModelView
                 {
                     m_haslabels = value;
                     NotifyPropertyChanged("HasLabels");
-                    this.refreshShowPlot();
+                    this.RefreshShowPlot();
                 }
             }
         }//HasLabels
@@ -333,7 +373,7 @@ namespace StatApp.ModelView
                 {
                     m_haspoints = value;
                     NotifyPropertyChanged("HasPoints");
-                    this.refreshShowPlot();
+                    this.RefreshShowPlot();
                 }
             }
         }//HasPoints
@@ -349,7 +389,7 @@ namespace StatApp.ModelView
                 {
                     m_hasimages = value;
                     NotifyPropertyChanged("HasImages");
-                    this.refreshShowPlot();
+                    this.RefreshShowPlot();
                 }
             }
         }//HasImages
@@ -458,7 +498,7 @@ namespace StatApp.ModelView
                     m_linktype = value;
                     NotifyPropertyChanged("LinkType");
                     this.HierarClusterSet = null;
-                    this.refreshHierar();
+                    this.UpdateClusters(this.ClassesCount, this.IterationsCount, CancellationToken.None, null);
                 }
             }
         }// LinkType
@@ -634,7 +674,7 @@ namespace StatApp.ModelView
                     m_currentX = value;
                     this.NotifyPropertyChanged("CurrentXVariable");
                     this.NotifyPropertyChanged("XVarName");
-                    refreshShowPlot();
+                    RefreshShowPlot();
                 }
             }
         }// CurrentXVariable
@@ -675,7 +715,7 @@ namespace StatApp.ModelView
                     m_currentY = value;
                     this.NotifyPropertyChanged("CurrentYVariable");
                     this.NotifyPropertyChanged("YVarName");
-                    refreshShowPlot();
+                    RefreshShowPlot();
                 }
             }
         }// CurrentXVariable
@@ -691,7 +731,7 @@ namespace StatApp.ModelView
                 {
                     m_nbclusters = value;
                     this.NotifyPropertyChanged("ClustersCount");
-                    this.updateClusters();
+                    this.UpdateClusters(this.ClassesCount, this.IterationsCount, CancellationToken.None, null);
                 }
             }
         }// ClustersCount
@@ -707,7 +747,7 @@ namespace StatApp.ModelView
                 {
                     m_categiterations = value;
                     this.NotifyPropertyChanged("IterationsCount");
-                    this.updateClusters();
+                    this.UpdateClusters(this.ClassesCount, this.IterationsCount, CancellationToken.None, null);
                 }
             }
         }// IterationsCount
@@ -964,178 +1004,145 @@ namespace StatApp.ModelView
                 this.RefreshVariablesValues();
             }
         }// RemoveVariables
-        public async void RefreshArrangements(int nbIterations, CancellationToken cancellationToken)
+        public void RefreshArrangements(int nbIterations, CancellationToken cancellationToken)
         {
-            var xRet = await CreateArrangeDataAsync(nbIterations, cancellationToken);
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return;
-            }
-            int[] pRows = xRet.Item1;
-            DisplayItemsArray oDisp = xRet.Item2;
-            PlotModel model = xRet.Item3;
-            if ((pRows == null) || (oDisp == null) || (model == null))
-            {
-                return;
-            }
-            var inds = this.Individus;
-            foreach (var ind in inds)
-            {
-                ind.Position = -1;
-            }// ind
-            int n = pRows.Length;
-            for (int i = 0; i < n; ++i)
-            {
-                int index = pRows[i];
-                var q = from x in inds where x.IndivIndex == index select x;
-                if (q.Count() > 0)
-                {
-                    var p = q.First();
-                    p.Position = i;
-                }
-            }// i
-            this.SortedIndivsData = oDisp;
-            this.RowArrangePlot = model;
-            this.IsBusy = false;
+            this.UpdateClusters(this.ClassesCount, nbIterations, cancellationToken, null);
         }//RefreshArrangements 
-        public Task<Tuple<int[], DisplayItemsArray, PlotModel>> CreateArrangeDataAsync(int nbIterations, CancellationToken cancellationToken)
+        public Tuple<int[], DisplayItemsArray, PlotModel> CreateArrangeData(int nbIterations, CancellationToken cancellationToken)
         {
             var pDataModel = this;
             var inds = pDataModel.Individus;
             var vars = pDataModel.CurrentVariables.ToArray();
             int nv = vars.Length;
-            return Task.Run<Tuple<int[], DisplayItemsArray, PlotModel>>(() =>
+            int[] pRows = null;
+            DisplayItemsArray oDisp = null;
+            PlotModel model = null;
+            try
             {
-                int[] pRows = null;
-                DisplayItemsArray oDisp = null;
-                PlotModel model = null;
-                try
+                var t1 = ArrangeSet.ArrangeIndex(pDataModel, nbIterations, cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    var t1 = ArrangeSet.ArrangeIndex(pDataModel, nbIterations, cancellationToken);
-                    if (cancellationToken.IsCancellationRequested)
+                    return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
+                }
+                pRows = t1.Item1;
+                int[] pCols = t1.Item2;
+                if ((pRows == null) || (pCols == null))
+                {
+                    return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
+                }
+                if (pCols.Length < nv)
+                {
+                    return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
+                }
+                double somme = 0.0;
+                List<double> xdelta = new List<double>();
+                List<double> xcum = new List<double>();
+                oDisp = new DisplayItemsArray();
+                DisplayItems header = new DisplayItems();
+                header.Add(new DisplayItem("Pos.", true));
+                header.Add(new DisplayItem("Index", true));
+                header.Add(new DisplayItem("ID", true));
+                header.Add(new DisplayItem("Nom", true));
+                header.Add(new DisplayItem("Photo", true));
+                for (int i = 0; i < nv; ++i)
+                {
+                    int ii = pCols[i];
+                    if (ii >= nv)
                     {
                         return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
                     }
-                    pRows = t1.Item1;
-                    int[] pCols = t1.Item2;
-                    if ((pRows == null) || (pCols == null))
+                    String name = (vars[ii]).Name;
+                    header.Add(new DisplayItem(name, true));
+                }// i
+                oDisp.Add(header);
+                IndivData firstIndiv = null;
+                int nr = pRows.Length;
+                for (int i = 0; i < nr; ++i)
+                {
+                    int index = pRows[i];
+                    var q = from x in inds where x.IndivIndex == index select x;
+                    if (q.Count() > 0)
                     {
-                        return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
-                    }
-                    if (pCols.Length < nv)
-                    {
-                        return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
-                    }
-                    double somme = 0.0;
-                    List<double> xdelta = new List<double>();
-                    List<double> xcum = new List<double>();
-                    oDisp = new DisplayItemsArray();
-                    DisplayItems header = new DisplayItems();
-                    header.Add(new DisplayItem("Pos.", true));
-                    header.Add(new DisplayItem("Index", true));
-                    header.Add(new DisplayItem("ID", true));
-                    header.Add(new DisplayItem("Nom", true));
-                    header.Add(new DisplayItem("Photo", true));
-                    for (int i = 0; i < nv; ++i)
-                    {
-                        int ii = pCols[i];
-                        if (ii >= nv)
+                        var ind = q.First();
+                        DisplayItems line = new DisplayItems();
+                        line.Tag = ind;
+                        line.Add(new DisplayItem(i + 1));
+                        line.Add(new DisplayItem(ind.IndivIndex));
+                        line.Add(new DisplayItem(ind.IdString));
+                        line.Add(new DisplayItem(ind.Name));
+                        if ((ind.PhotoData != null) && (ind.PhotoData.Length > 1))
                         {
-                            return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
+                            line.Add(new DisplayItem(ind.PhotoData));
                         }
-                        String name = (vars[ii]).Name;
-                        header.Add(new DisplayItem(name, true));
-                    }// i
-                    oDisp.Add(header);
-                    IndivData firstIndiv = null;
-                    int nr = pRows.Length;
-                    for (int i = 0; i < nr; ++i)
-                    {
-                        int index = pRows[i];
-                        var q = from x in inds where x.IndivIndex == index select x;
-                        if (q.Count() > 0)
+                        else
                         {
-                            var ind = q.First();
-                            DisplayItems line = new DisplayItems();
-                            line.Tag = ind;
-                            line.Add(new DisplayItem(i + 1));
-                            line.Add(new DisplayItem(ind.IndivIndex));
-                            line.Add(new DisplayItem(ind.IdString));
-                            line.Add(new DisplayItem(ind.Name));
-                            if ((ind.PhotoData != null) && (ind.PhotoData.Length > 1))
+                            line.Add(new DisplayItem());
+                        }
+                        double[] dd = ind.DoubleData;
+                        if ((dd != null) && (dd.Length >= nv))
+                        {
+                            for (int j = 0; j < nv; ++j)
                             {
-                                line.Add(new DisplayItem(ind.PhotoData));
-                            }
-                            else
-                            {
-                                line.Add(new DisplayItem());
-                            }
-                            double[] dd = ind.DoubleData;
-                            if ((dd != null) && (dd.Length >= nv))
-                            {
-                                for (int j = 0; j < nv; ++j)
-                                {
-                                    int ii = pCols[j];
-                                    double xx = dd[ii];
-                                    line.Add(new DisplayItem(xx));
-                                }// i
-                            }// dd
-                            oDisp.Add(line);
-                            if (firstIndiv == null)
-                            {
-                                firstIndiv = ind;
-                            }
-                            else
-                            {
-                                double dx = ind.ComputeDistance(firstIndiv);
-                                somme += dx;
-                                xdelta.Add(dx);
-                                xcum.Add(somme);
-                                firstIndiv = ind;
-                            }
-                        }// ok
-                    }// i
-                    if (somme > 0.0)
+                                int ii = pCols[j];
+                                double xx = dd[ii];
+                                line.Add(new DisplayItem(xx));
+                            }// i
+                        }// dd
+                        oDisp.Add(line);
+                        if (firstIndiv == null)
+                        {
+                            firstIndiv = ind;
+                        }
+                        else
+                        {
+                            double dx = ind.ComputeDistance(firstIndiv);
+                            somme += dx;
+                            xdelta.Add(dx);
+                            xcum.Add(somme);
+                            firstIndiv = ind;
+                        }
+                    }// ok
+                }// i
+                if (somme > 0.0)
+                {
+                    double[] ddx = xdelta.ToArray();
+                    double[] ddc = xcum.ToArray();
+                    int nx = ddx.Length;
+                    for (int i = 0; i < nx; ++i)
                     {
-                        double[] ddx = xdelta.ToArray();
-                        double[] ddc = xcum.ToArray();
-                        int nx = ddx.Length;
+                        ddx[i] = ddx[i] / somme;
+                        ddc[i] = ddc[i] / somme;
+                    }// i
+                    double vmin = ddx.Min();
+                    double vmax = ddx.Max();
+                    if (vmin < vmax)
+                    {
+                        double delta = vmax - vmin;
                         for (int i = 0; i < nx; ++i)
                         {
-                            ddx[i] = ddx[i] / somme;
-                            ddc[i] = ddc[i] / somme;
+                            ddx[i] = (ddx[i] - vmin) / delta;
                         }// i
-                        double vmin = ddx.Min();
-                        double vmax = ddx.Max();
-                        if (vmin < vmax)
+                        model = new PlotModel("Arrangements");
+                        model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Bottom, FontWeight = FontWeights.Bold });
+                        model.Axes.Add(new LinearAxis() { Title = "Distances", Minimum = ddx.Min(), Maximum = ddx.Max(), Position = AxisPosition.Left, FontWeight = FontWeights.Bold });
+                        model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Top, FontWeight = FontWeights.Bold });
+                        model.Axes.Add(new LinearAxis() { Title = "Cummul", Minimum = ddc.Min(), Maximum = ddc.Max(), Position = AxisPosition.Right, FontWeight = FontWeights.Bold });
+                        var sx = new LineSeries { Title = "Distances", Smooth = true, FontWeight = FontWeights.Bold };
+                        var sy = new LineSeries { Title = "Cummul", Smooth = true, FontWeight = FontWeights.Bold };
+                        for (int i = 0; i < nx; ++i)
                         {
-                            double delta = vmax - vmin;
-                            for (int i = 0; i < nx; ++i)
-                            {
-                                ddx[i] = (ddx[i] - vmin) / delta;
-                            }// i
-                            model = new PlotModel("Arrangements");
-                            model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Bottom, FontWeight = FontWeights.Bold });
-                            model.Axes.Add(new LinearAxis() { Title = "Distances", Minimum = ddx.Min(), Maximum = ddx.Max(), Position = AxisPosition.Left, FontWeight = FontWeights.Bold });
-                            model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Top, FontWeight = FontWeights.Bold });
-                            model.Axes.Add(new LinearAxis() { Title = "Cummul", Minimum = ddc.Min(), Maximum = ddc.Max(), Position = AxisPosition.Right, FontWeight = FontWeights.Bold });
-                            var sx = new LineSeries { Title = "Distances", Smooth = true, FontWeight = FontWeights.Bold };
-                            var sy = new LineSeries { Title = "Cummul", Smooth = true, FontWeight = FontWeights.Bold };
-                            for (int i = 0; i < nx; ++i)
-                            {
-                                sx.Points.Add(new DataPoint((double)(i + 1), ddx[i]));
-                                sy.Points.Add(new DataPoint((double)(i + 1), ddc[i]));
-                            }// i
-                            model.Series.Add(sx);
-                            model.Series.Add(sy);
-                        }// graph
-                    }// someme
-                }// try
-                catch (Exception /* ex */)
-                {
-                }
-                return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
-            }, cancellationToken);
+                            sx.Points.Add(new DataPoint((double)(i + 1), ddx[i]));
+                            sy.Points.Add(new DataPoint((double)(i + 1), ddc[i]));
+                        }// i
+                        model.Series.Add(sx);
+                        model.Series.Add(sy);
+                    }// graph
+                }// someme
+            }// try
+            catch (Exception /* ex */)
+            {
+            }
+            return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
         }//CreateArrangeDataAsync 
         #endregion // Mehods
         #region Helpers
@@ -1156,12 +1163,7 @@ namespace StatApp.ModelView
             {
                 this.Individus = new IndivDatas(xx);
             }
-            this.OrdDisplayData = null;
-            this.HierarShowModel = null;
-            this.KMeansShowModel = null;
-            this.ClusterShowModel = null;
-            this.updateClusters();
-            this.IsBusy = bOld;
+            this.UpdateClusters(this.ClassesCount, 1, CancellationToken.None, null);
         }
         private async void refreshOrdData()
         {
@@ -1228,20 +1230,56 @@ namespace StatApp.ModelView
             this.Individus = p;
             m_busy = false;
         }// updateCategValues
-        private async void updateClusters()
+        public async void UpdateClusters(int nbClasses, int nbIterations,
+            CancellationToken cancellationToken, IProgress<Tuple<int, CategClusterSet>> progress)
         {
             bool bOld = this.IsBusy;
             this.IsBusy = true;
-            this.CategClusterSet = await CategClusterSet.Clusterize(this, this.ClustersCount, 5, CancellationToken.None, null);
-            this.KMeansClusterSet = await CategClusterSet.KMeans(this, this.ClustersCount, 5, CancellationToken.None, null);
-            this.HierarClusterSet = await TreeItem.Hierar(this, this.ClustersCount, this.LinkType, CancellationToken.None);
+            var tt = await UpdateClustersAsync(nbClasses, nbIterations, cancellationToken, progress);
+            this.CategClusterSet = tt.Item1[0];
+            this.KMeansClusterSet = tt.Item1[1];
+            this.HierarClusterSet = tt.Item1[2];
+            this.RowIndexes = tt.Item2;
+            this.RowArrangePlot = tt.Item3;
             updateCategClusterSet();
             updateKMeansClusterSet();
             updateHierarClusterSet();
-            this.CombinedShowModel = createComninedShowPlot();
-            RefreshArrangements(1, CancellationToken.None);
+            this.SortedIndivsData = tt.Item4;
+            this.RefreshShowPlot();
             this.IsBusy = bOld;
         }// updatePlots
+        public Task<Tuple<CategClusterSet[], int[], PlotModel, DisplayItemsArray>> UpdateClustersAsync(int nbClasses, int nbIterations,
+            CancellationToken cancellationToken, IProgress<Tuple<int, CategClusterSet>> progress)
+        {
+            OrdModelView model = this;
+            int nClusters = this.ClustersCount;
+            var ltype = this.LinkType;
+            CategClusterSet[] oSets = new CategClusterSet[3];
+            int[] pRows = null;
+            DisplayItemsArray oDisp = null;
+            PlotModel pPlot = null;
+            return Task.Run<Tuple<CategClusterSet[], int[], PlotModel, DisplayItemsArray>>(() =>
+            {
+                Parallel.Invoke(() =>
+                {
+                    oSets[0] = CategClusterSet.Clusterize(model, nClusters, nbIterations, cancellationToken, progress);
+                }, () =>
+                {
+                    var p = CategClusterSet.KMeans(model, nClusters, nbClasses, cancellationToken, progress);
+                    oSets[1] = p;
+                }, () =>
+                {
+                    oSets[2] = TreeItem.Hierar(model, nClusters, ltype, cancellationToken);
+                }, () =>
+                {
+                    var tt = CreateArrangeData(nbIterations, cancellationToken);
+                    pRows = tt.Item1;
+                    oDisp = tt.Item2;
+                    pPlot = tt.Item3;
+                });
+                return new Tuple<CategClusterSet[], int[], PlotModel, DisplayItemsArray>(oSets, pRows, pPlot, oDisp);
+            }, cancellationToken);
+        }// UpdateClustersAsync
         private void updateCategClusterSet()
         {
             var oSet = this.CategClusterSet;
@@ -1270,12 +1308,6 @@ namespace StatApp.ModelView
                     }
                 }// z
             }// cluster
-            //this.ClusterHistogModel = await createClusterHistogPlot();
-            this.ClusterShowModel = createClusterShowPlot();
-            var old = this.Individus;
-            this.Individus = null;
-            this.Individus = old;
-            this.IsBusy = false;
         }
         private void updateKMeansClusterSet()
         {
@@ -1305,18 +1337,6 @@ namespace StatApp.ModelView
                     }
                 }// z
             }// cluster
-            //this.KMeansHistogModel = await createKMeansHistogPlot();
-            this.KMeansShowModel = createKMeansShowPlot();
-            var old = this.Individus;
-            this.Individus = null;
-            this.Individus = old;
-            this.IsBusy = false;
-        }
-        private async void refreshHierar()
-        {
-            this.IsBusy = true;
-            var xx = await TreeItem.Hierar(this, this.ClustersCount, this.LinkType, CancellationToken.None);
-            this.HierarClusterSet = xx;
         }
         private void updateHierarClusterSet()
         {
@@ -1346,11 +1366,6 @@ namespace StatApp.ModelView
                     }
                 }// z
             }// cluster
-            this.HierarShowModel = createHierarShowPlot();
-            var old = this.Individus;
-            this.Individus = null;
-            this.Individus = old;
-            this.IsBusy = false;
         }
         private PlotModel createComninedShowPlot()
         {
@@ -1411,6 +1426,12 @@ namespace StatApp.ModelView
             }
             return model;
         }// createShowPlot
+        public Task<PlotModel> CreateCombinedShowPlotAsync()
+        {
+            return Task.Run<PlotModel>(() => {
+                return createComninedShowPlot();
+            });
+        }//CreateCombinedShowPlotAsync 
         private PlotModel createShowPlot(String title, String prefix, CategClusterSet oSet)
         {
             PlotModel model = null;
@@ -1578,13 +1599,38 @@ namespace StatApp.ModelView
             CategClusterSet oSet = this.HierarClusterSet;
             return this.createShowPlot(title, prefix, oSet);
         }// createCategHistogPlot
-        private void refreshShowPlot()
+        private async void RefreshShowPlot()
         {
-            this.ClusterShowModel = createClusterShowPlot();
-            this.KMeansShowModel = createKMeansShowPlot();
-            this.HierarShowModel = createHierarShowPlot();
-            this.CombinedShowModel = createComninedShowPlot();
+            var pp = await RefreshShowPlotsAsync();
+            if (pp != null)
+            {
+                this.ClusterShowModel = pp[0];
+                this.KMeansShowModel = pp[1];
+                this.HierarShowModel = pp[2];
+                this.CombinedShowModel = pp[3];
+            }// pp
         }
+        public Task<PlotModel[]> RefreshShowPlotsAsync()
+        {
+            return Task.Run<PlotModel[]>(() =>
+            {
+                PlotModel[] pRet = new PlotModel[4];
+                Parallel.Invoke(() =>
+                {
+                    pRet[0] = createClusterShowPlot();
+                }, () =>
+                {
+                    pRet[1] = createKMeansShowPlot();
+                }, () =>
+                {
+                    pRet[2] = createHierarShowPlot();
+                }, () =>
+                {
+                    pRet[3] = createComninedShowPlot();
+                });
+                return pRet;
+            });
+        }// RefreshShowPlotsAsync
         private DisplayItemsArray createOrdDisplayData()
         {
             List<DisplayItems> oRet = null;

@@ -7,7 +7,7 @@ using System.Threading;
 using StatData;
 namespace StatApp.ModelView
 {
-    
+
     public class CategClusterSet : Observable, ICloneable
     {
         #region Instance Variables
@@ -212,10 +212,11 @@ namespace StatApp.ModelView
                 oCluster.UpdateCenter();
             }
         }// UpdateCenters
-        public static Task<CategClusterSet> Clusterize(OrdModelView model, int nClusters, int nbIterations,
-            CancellationToken cancellationToken, IProgress<Tuple<int,CategClusterSet> > progress)
+        public static Task<CategClusterSet> ClusterizeAsync(OrdModelView model, int nClusters, int nbIterations,
+            CancellationToken cancellationToken, IProgress<Tuple<int, CategClusterSet>> progress)
         {
-            return Task.Run<CategClusterSet>(() => {
+            return Task.Run<CategClusterSet>(() =>
+            {
                 CategClusterSet oBest = null;
                 double bestcrit = 0.0;
                 for (int i = 0; i < nbIterations; ++i)
@@ -247,8 +248,8 @@ namespace StatApp.ModelView
                         bestcrit = p.CurrentCrit;
                         if (progress != null)
                         {
-                           pp = (CategClusterSet)oBest.Clone();
-                           pp.UpdateCenters();
+                            pp = (CategClusterSet)oBest.Clone();
+                            pp.UpdateCenters();
                         }
                     }
                     if (progress != null)
@@ -262,7 +263,56 @@ namespace StatApp.ModelView
                 }
                 return oBest;
             }, cancellationToken);
-        }// Clusterize
+        }// ClusterizeAsync
+        public static CategClusterSet Clusterize(OrdModelView model, int nClusters, int nbIterations,
+          CancellationToken cancellationToken, IProgress<Tuple<int, CategClusterSet>> progress)
+        {
+            CategClusterSet oBest = null;
+            double bestcrit = 0.0;
+            for (int i = 0; i < nbIterations; ++i)
+            {
+                CategClusterSet pp = null;
+                int f = (int)(((double)i / (double)nbIterations) * 100.0 + 0.5);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                var p = ProcessAsync(model, nClusters, cancellationToken);
+                if (p == null)
+                {
+                    break;
+                }
+                if (oBest == null)
+                {
+                    oBest = p;
+                    bestcrit = p.CurrentCrit;
+                    if (progress != null)
+                    {
+                        pp = (CategClusterSet)oBest.Clone();
+                        pp.UpdateCenters();
+                    }
+                }
+                else if (p.CurrentCrit > bestcrit)
+                {
+                    oBest = p;
+                    bestcrit = p.CurrentCrit;
+                    if (progress != null)
+                    {
+                        pp = (CategClusterSet)oBest.Clone();
+                        pp.UpdateCenters();
+                    }
+                }
+                if (progress != null)
+                {
+                    progress.Report(new Tuple<int, CategClusterSet>(f, pp));
+                }
+            }// i
+            if (oBest != null)
+            {
+                oBest.UpdateCenters();
+            }
+            return oBest;
+        }// ClusterizeAsync
         public static CategClusterSet ProcessAsync(OrdModelView model, int nClusters, CancellationToken cancellationToken)
         {
             if ((model == null) || (nClusters < 2))
@@ -303,7 +353,7 @@ namespace StatApp.ModelView
                     index = indiv.IndivIndex;
                 }
                 oCur.Add(index);
-                var xc = new Cluster(indiv,ClassificationType.Utility);
+                var xc = new Cluster(indiv, ClassificationType.Utility);
                 xc.Name = String.Format("CU{0}", i + 1);
                 xc.Index = i;
                 cc[i] = xc;
@@ -331,7 +381,7 @@ namespace StatApp.ModelView
             }// inds
             return oRet;
         }// Process
-        public static Task<CategClusterSet> KMeans(OrdModelView model, int nClusters, int nbIterations, CancellationToken cancellationToken,
+        public static Task<CategClusterSet> KMeansAsync(OrdModelView model, int nClusters, int nbIterations, CancellationToken cancellationToken,
             IProgress<Tuple<int, CategClusterSet>> progress)
         {
             return Task.Run<CategClusterSet>(() =>
@@ -376,6 +426,49 @@ namespace StatApp.ModelView
                 }// i
                 return oBest;
             }, cancellationToken);
+        }//KMeans 
+        public static CategClusterSet KMeans(OrdModelView model, int nClusters, int nbIterations, CancellationToken cancellationToken,
+            IProgress<Tuple<int, CategClusterSet>> progress)
+        {
+            CategClusterSet oBest = new CategClusterSet(model);
+            oBest.initializeCiusters(nClusters);
+            for (int i = 0; i < nbIterations; ++i)
+            {
+                CategClusterSet pp = new CategClusterSet();
+                pp.m_model = oBest.m_model;
+                pp.m_nvars = oBest.m_nvars;
+                pp.m_indivs = oBest.m_indivs;
+                List<Cluster> oList = new List<Cluster>();
+                foreach (var c in oBest.Clusters)
+                {
+                    Cluster cc = new Cluster();
+                    cc.Index = c.Index;
+                    cc.Name = c.Name;
+                    cc.Center = (double[])c.Center.Clone();
+                    oList.Add(cc);
+                }// c
+                pp.Clusters = oList;
+                int f = (int)(((double)i / (double)nbIterations) * 100.0 + 0.5);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                pp.kmeansstep(cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                if (oBest.Equals(pp))
+                {
+                    break;
+                }
+                oBest = pp;
+                if (progress != null)
+                {
+                    progress.Report(new Tuple<int, CategClusterSet>(f, pp));
+                }
+            }// i
+            return oBest;
         }//KMeans 
         #endregion // Methods
         #region helpers
@@ -619,21 +712,21 @@ namespace StatApp.ModelView
         {
             bool oRet = false;
             var inds = this.Indivs;
-           if ((inds == null) || (nbClusters < 2))
-           {
-               return oRet;
-           }
-           if (inds.Count < nbClusters)
-           {
-               return oRet;
-           }
-           double[] dd = inds.First().DoubleData;
-           int nv = dd.Length;
-           if (nv < 1)
-           {
-               return oRet;
-           }
-            double[,] dLimits  = new double[3,nv];
+            if ((inds == null) || (nbClusters < 2))
+            {
+                return oRet;
+            }
+            if (inds.Count < nbClusters)
+            {
+                return oRet;
+            }
+            double[] dd = inds.First().DoubleData;
+            int nv = dd.Length;
+            if (nv < 1)
+            {
+                return oRet;
+            }
+            double[,] dLimits = new double[3, nv];
             for (int i = 0; i < nv; ++i)
             {
                 double x = dd[i];
@@ -682,7 +775,7 @@ namespace StatApp.ModelView
             for (int i = 0; i < nbClusters; ++i)
             {
                 double[] xc = new double[nv];
-                 for (int j = 0; j < nv; ++j)
+                for (int j = 0; j < nv; ++j)
                 {
                     xc[j] = dLimits[0, j] + (i + 1) * dLimits[2, j];
                 }// j

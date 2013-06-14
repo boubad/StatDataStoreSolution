@@ -115,9 +115,10 @@ namespace StatApp.ModelView
         }
         #endregion // Properties
         #region Methods
-        public static Task<CategClusterSet> Hierar(OrdModelView model, int nbClusters, TreeLinkType t,CancellationToken cancellationToken)
+        public static Task<CategClusterSet> HierarAsync(OrdModelView model, int nbClusters, TreeLinkType t, CancellationToken cancellationToken)
         {
-            return Task.Run<CategClusterSet>(() => {
+            return Task.Run<CategClusterSet>(() =>
+            {
                 CategClusterSet pSet = null;
                 try
                 {
@@ -147,7 +148,7 @@ namespace StatApp.ModelView
                         }
                         Cluster c = new Cluster();
                         c.Index = icur;
-                        c.Name = String.Format("HC{0}",icur+1);
+                        c.Name = String.Format("HC{0}", icur + 1);
                         c.Elements = ll;
                         foreach (var p in c.Elements)
                         {
@@ -166,9 +167,60 @@ namespace StatApp.ModelView
                 {
                 }
                 return pSet;
-            },cancellationToken);
+            }, cancellationToken);
         }// Hiera
-        public List<List<IndivData> > Clusterize(int nbClusters, CancellationToken cancellationToken)
+        public static CategClusterSet Hierar(OrdModelView model, int nbClusters, TreeLinkType t, CancellationToken cancellationToken)
+        {
+            CategClusterSet pSet = null;
+            try
+            {
+                TreeItem oTree = new TreeItem(model.Individus, t);
+                oTree.update(cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+                var oList = oTree.Clusterize(nbClusters, cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+                if (oList == null)
+                {
+                    return null;
+                }
+                pSet = new CategClusterSet();
+                List<Cluster> lc = new List<Cluster>();
+                int icur = 0;
+                foreach (var ll in oList)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return null;
+                    }
+                    Cluster c = new Cluster();
+                    c.Index = icur;
+                    c.Name = String.Format("HC{0}", icur + 1);
+                    c.Elements = ll;
+                    foreach (var p in c.Elements)
+                    {
+                        p.HierarClusterIndex = icur;
+                        p.HierarClusterString = c.Name;
+                    }// p
+                    c.UpdateCenter();
+                    lc.Add(c);
+                    ++icur;
+                }// ll
+                pSet.Clusters = lc;
+                pSet.Indivs = model.Individus;
+                pSet.Model = model;
+            }
+            catch (Exception /*ex */)
+            {
+            }
+            return pSet;
+        }// Hiera
+        public List<List<IndivData>> Clusterize(int nbClusters, CancellationToken cancellationToken)
         {
             List<List<IndivData>> oRet = null;
             if (cancellationToken.IsCancellationRequested)
@@ -209,7 +261,7 @@ namespace StatApp.ModelView
         }// Clusterize
         #endregion // Methods
         #region Helpers
-        protected double computeDistance(TreeItem other,CancellationToken cancellationToken)
+        protected double computeDistance(TreeItem other, CancellationToken cancellationToken)
         {
             double dRet = 0.0;
             if (other != null)
@@ -242,7 +294,7 @@ namespace StatApp.ModelView
             }
             if (this.IsLeaf && other.IsLeaf)
             {
-                return computeDistance(other,cancellationToken);
+                return computeDistance(other, cancellationToken);
             }
             if (this.IsLeaf && (!other.IsLeaf))
             {
@@ -251,7 +303,7 @@ namespace StatApp.ModelView
                 {
                     return dRet;
                 }
-                dRet = computeDistance(col[0],cancellationToken);
+                dRet = computeDistance(col[0], cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return dRet;
@@ -266,7 +318,7 @@ namespace StatApp.ModelView
                                 {
                                     return dRet;
                                 }
-                                double d = computeDistance(t,cancellationToken);
+                                double d = computeDistance(t, cancellationToken);
                                 if (d > dRet)
                                 {
                                     dRet = d;
@@ -282,7 +334,7 @@ namespace StatApp.ModelView
                                 {
                                     return dRet;
                                 }
-                                double d = computeDistance(t,cancellationToken);
+                                double d = computeDistance(t, cancellationToken);
                                 if (d < dRet)
                                 {
                                     dRet = d;
@@ -301,7 +353,7 @@ namespace StatApp.ModelView
                                     return dRet;
                                 }
                                 ++nc;
-                                double d = computeDistance(t,cancellationToken);
+                                double d = computeDistance(t, cancellationToken);
                                 dRet += d;
                             }// t
                             if (nc > 0)
@@ -314,7 +366,7 @@ namespace StatApp.ModelView
             }
             else if ((!this.IsLeaf) && other.IsLeaf)
             {
-                return other.getDistance(this,cancellationToken);
+                return other.getDistance(this, cancellationToken);
             }
             else
             {
@@ -340,7 +392,7 @@ namespace StatApp.ModelView
                                     {
                                         return dRet;
                                     }
-                                    double d = t1.computeDistance(col2[j],cancellationToken);
+                                    double d = t1.computeDistance(col2[j], cancellationToken);
                                     if ((i == 0) && (j == 0))
                                     {
                                         dRet = d;
@@ -368,7 +420,7 @@ namespace StatApp.ModelView
                                     {
                                         return dRet;
                                     }
-                                    double d = t1.computeDistance(col2[j],cancellationToken);
+                                    double d = t1.computeDistance(col2[j], cancellationToken);
                                     if ((i == 0) && (j == 0))
                                     {
                                         dRet = d;
@@ -393,7 +445,7 @@ namespace StatApp.ModelView
                                 var t1 = col1[i];
                                 for (int j = 0; j < n2; ++j)
                                 {
-                                    double d = t1.computeDistance(col2[j],cancellationToken);
+                                    double d = t1.computeDistance(col2[j], cancellationToken);
                                     dRet += d;
                                     ++nc;
                                 }// j
@@ -436,7 +488,7 @@ namespace StatApp.ModelView
                     {
                         return;
                     }
-                    double d = t.getDistance(col[j],cancellationToken);
+                    double d = t.getDistance(col[j], cancellationToken);
                     int i1 = i * n + j;
                     m_distances[i1] = d;
                     int i2 = j * n + i;
@@ -643,7 +695,7 @@ namespace StatApp.ModelView
                 {
                     return;
                 }
-                v.getLeaves(oList,cancelletionToken);
+                v.getLeaves(oList, cancelletionToken);
             }
         }// getLeaves
         #endregion

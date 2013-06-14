@@ -645,7 +645,12 @@ namespace StatApp.Controles
                     for (int i = 0; i < nr; ++i)
                     {
                         var v = oInds[i];
-                        rownames[i] = v.Name;
+                        String sId = v.IdString;
+                        if (String.IsNullOrEmpty(sId))
+                        {
+                            sId = v.Name;
+                        }
+                        rownames[i] = sId;
                         double[] dd = v.DoubleData;
                         int nx = (dd.Length < nv) ? dd.Length : nv;
                         for (int j = 0; j < nx; ++j)

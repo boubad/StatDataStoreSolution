@@ -46,7 +46,7 @@ namespace StatApp.Controles
             }
             return pRet;
         }// getModel
-        private async void buttonCompute_Click(object sender, RoutedEventArgs e)
+        private void buttonCompute_Click(object sender, RoutedEventArgs e)
         {
             var model = getModel();
             if (model == null)
@@ -73,9 +73,8 @@ namespace StatApp.Controles
                 }// v
             });
             model.IsBusy = true;
-            var xx = await CategClusterSet.Clusterize(model, model.ClustersCount, model.IterationsCount, m_cts.Token, progress);
+            model.UpdateClusters(model.ClassesCount, model.IterationsCount, m_cts.Token, progress);
             m_cts = null;
-            model.CategClusterSet = xx;
             this.progressbar.Visibility = Visibility.Hidden;
             this.buttonCancel.IsEnabled = false;
             this.buttonCompute.IsEnabled = true;
