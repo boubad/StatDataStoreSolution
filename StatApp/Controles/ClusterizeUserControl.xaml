@@ -58,9 +58,6 @@
                         <TextBlock Style="{StaticResource mylabelstyle}" FontWeight="Bold" Text="{Binding Path=XVarName}" />
                     </StackPanel>
                 </StackPanel>
-                <CheckBox x:Name="checkboxCateg" Style="{StaticResource mycheckboxstyle}" IsThreeState="False" Click="checkboxCateg_Click">Catégorie</CheckBox>
-                <ComboBox x:Name="comboboxCateg" Style="{StaticResource mycomboboxstyle}" ItemsSource="{Binding Path=AllCategVariables}"
-                      SelectedItem="{Binding Path=CurrentCategVariable}" Width="130" />
             </StackPanel>
         </StackPanel>
         <local:ClassificationUserControl  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>

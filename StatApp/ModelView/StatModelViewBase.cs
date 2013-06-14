@@ -36,6 +36,11 @@ namespace StatApp.ModelView
         public static readonly String DEFAULT_SERIE_NAME = "Individus";
         private static byte[] DEFAULT_IMAGE_BYTES = null;
         protected static readonly double IMAGE_SCALE_FACTOR = 3.0;
+        public static readonly OxyColor[] TAB_COLORS = new OxyColor[]{
+                OxyColors.Black,OxyColors.Red,OxyColors.Green,OxyColors.Blue,
+                OxyColors.Cyan, OxyColors.Magenta,OxyColors.Yellow,OxyColors.Violet,
+                OxyColors.Chocolate,OxyColors.DarkGray, OxyColors.DarkKhaki
+                };
         #endregion //Static Variables
         #region Instance Variables
         private IServiceLocator m_servicelocator;
@@ -132,6 +137,97 @@ namespace StatApp.ModelView
         }// GetAllStatDataSetsAsync
         #endregion // async data tasks
         #region Methods
+        public static OxyColor GetColor(int index)
+        {
+            if (index < 0)
+            {
+                return TAB_COLORS[(-index) % TAB_COLORS.Length];
+            }
+            else
+            {
+                return TAB_COLORS[index % TAB_COLORS.Length];
+            }
+        }// getColor
+        public static List<Tuple<double, double, Cluster>> GetClustersCenters(VariableDesc oVarX, VariableDesc oVarY, CategClusterSet oSet)
+        {
+            List<Tuple<double,double, Cluster>> oList = new List<Tuple<double, double,Cluster>>();
+            if ((oVarX == null) || (oVarY == null) || (oSet == null))
+            {
+                return oList;
+            }
+            var col = new VariableDesc[] { oVarX, oVarY};
+            var tt = GetClustersCenters(col, oSet);
+            if (tt != null)
+            {
+                foreach (var t in tt)
+                {
+                    double[] dd = t.Item1;
+                    if ((dd != null) && (dd.Length > 1))
+                    {
+                        double x = dd[0];
+                        double y = dd[1];
+                        Cluster c = t.Item2;
+                        oList.Add(new Tuple<double, double, Cluster>(x, y, c));
+                    }
+                }// t
+            }// tt
+            return oList;
+        }//GetClustersCenters 
+        public static List<Tuple<double[], Cluster>> GetClustersCenters(IEnumerable<VariableDesc> oVars, CategClusterSet oSet)
+        {
+            List<Tuple<double[], Cluster>> oList = new List<Tuple<double[], Cluster>>();
+            if ((oVars == null) || (oSet == null))
+            {
+                return oList;
+            }
+            if (!oSet.IsValid)
+            {
+                return oList;
+            }
+            var oAr = oVars.ToArray();
+            int n = oAr.Length;
+            if (n < 1)
+            {
+                return oList;
+            }
+            var clusters = oSet.Clusters;
+            foreach (var cluster in clusters)
+            {
+                double[] dd = new double[n];
+                int[] count = new int[n];
+                for (int i = 0; i < n; ++i)
+                {
+                    dd[i] = 0.0;
+                    count[i] = 0;
+                }// i
+                var elements = cluster.Elements;
+                foreach (var ind in elements)
+                {
+                    var vals = ind.Values;
+                    for (int i = 0; i < n; ++i)
+                    {
+                        int nx = (oAr[i]).Id;
+                        var q = from x in vals where x.VariableId == nx select x;
+                        if (q.Count() > 0)
+                        {
+                            double xx = q.First().DoubleValue;
+                            count[i] = count[i] + 1;
+                            dd[i] = dd[i] + xx;
+                        }
+                    }// i
+                }// ind
+                for (int i = 0; i < n; ++i)
+                {
+                    int nc = count[i];
+                    if (nc > 0)
+                    {
+                        dd[i] = dd[i] / nc;
+                    }
+                }// i
+               oList.Add(new Tuple<double[],Cluster>(dd,cluster));
+            }// cluster
+            return oList;
+        }// GetClustersList
         public PlotModel CreateCartesianPlot(String sTitle, IEnumerable<IndivData> inds,
             VariableDesc oVarX, VariableDesc oVarY,
             Dictionary<int, OxyImage> imagesDict = null,
@@ -140,12 +236,9 @@ namespace StatApp.ModelView
             bool bLabels = false,
             bool bImages = false,
             bool bZeroCrossing = false,
-            bool bLeastSquares = false)
+            bool bLeastSquares = false,
+            List<Tuple<double,double,Cluster>> oCenters = null)
         {
-            if ((!bPoints) && (!bLabels) && (!bImages))
-            {
-                return null;
-            }
             if ((inds == null) || (oVarX == null) || (oVarY == null))
             {
                 return null;
@@ -219,6 +312,7 @@ namespace StatApp.ModelView
                 }
                 Dictionary<String, ScatterSeries> oSeries = new Dictionary<string, ScatterSeries>();
                 var indexes = vals.Keys;
+                int nColor = 0;
                 foreach (var index in indexes)
                 {
                     var t = vals[index];
@@ -234,7 +328,8 @@ namespace StatApp.ModelView
                             {
                                 if (!oSeries.ContainsKey(scateg))
                                 {
-                                    oSeries[scateg] = new ScatterSeries() { MarkerType = MarkerType.Circle };
+                                    OxyColor color = StatModelViewBase.GetColor(nColor++);
+                                    oSeries[scateg] = new ScatterSeries(scateg) { MarkerType = MarkerType.Circle,MarkerFill=color };
                                 }
                                 oSeries[scateg].Points.Add(new ScatterPoint(x, y) { Tag = ind });
                             }
@@ -242,7 +337,8 @@ namespace StatApp.ModelView
                             {
                                 if (!oSeries.ContainsKey(DEFAULT_SERIE_NAME))
                                 {
-                                    oSeries[DEFAULT_SERIE_NAME] = new ScatterSeries() { MarkerType = MarkerType.Circle };
+                                    OxyColor color = StatModelViewBase.GetColor(nColor++);
+                                    oSeries[DEFAULT_SERIE_NAME] = new ScatterSeries(DEFAULT_SERIE_NAME) { MarkerType = MarkerType.Circle,MarkerFill=color };
                                 }
                                 oSeries[DEFAULT_SERIE_NAME].Points.Add(new ScatterPoint(x, y) { Tag = ind });
                             }
@@ -251,7 +347,8 @@ namespace StatApp.ModelView
                         {
                             if (!oSeries.ContainsKey(DEFAULT_SERIE_NAME))
                             {
-                                oSeries[DEFAULT_SERIE_NAME] = new ScatterSeries() { MarkerType = MarkerType.Circle };
+                                OxyColor color = StatModelViewBase.GetColor(nColor++);
+                                oSeries[DEFAULT_SERIE_NAME] = new ScatterSeries(DEFAULT_SERIE_NAME) { MarkerType = MarkerType.Circle,MarkerFill=color };
                             }
                             oSeries[DEFAULT_SERIE_NAME].Points.Add(new ScatterPoint(x, y) { Tag = ind });
                         }
@@ -270,6 +367,8 @@ namespace StatApp.ModelView
                                 Position = new DataPoint(x, y),
                                 Text = name,
                                 FontWeight = OxyPlot.FontWeights.Bold,
+                                HorizontalAlignment = OxyPlot.HorizontalAlignment.Center,
+                                VerticalAlignment = OxyPlot.VerticalAlignment.Middle,
                                 Tag = ind
                             });
                         }// write
@@ -299,6 +398,31 @@ namespace StatApp.ModelView
                         model.Series.Add(s1);
                     }// s1
                 }// bPoints
+                if ((oCenters != null) && (oCenters.Count > 0))
+                {
+                    foreach (var t in oCenters)
+                    {
+                        Cluster c = t.Item3;
+                        if (c != null)
+                        {
+                            String name = c.Name;
+                            if (String.IsNullOrEmpty(name))
+                            {
+                                name = String.Format("CL{0}", c.Index + 1);
+                            }
+                            double x = t.Item1;
+                            double y = t.Item2;
+                            model.Annotations.Add(new TextAnnotation
+                            {
+                                Position = new DataPoint(x, y),
+                                Text = name,
+                                FontWeight = OxyPlot.FontWeights.Bold,
+                                HorizontalAlignment = OxyPlot.HorizontalAlignment.Center,
+                                VerticalAlignment = OxyPlot.VerticalAlignment.Middle
+                            });
+                        }// c
+                    }// t
+                }
                 if (bLeastSquares)
                 {
                     double a, b;

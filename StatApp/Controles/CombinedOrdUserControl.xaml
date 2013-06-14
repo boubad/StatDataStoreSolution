@@ -4,18 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" Loaded="UserControl_Loaded"
+             xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" 
              >
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5,5">
-            <CheckBox x:Name="checkboxLabels" Style="{StaticResource mycheckboxstyle}" Click="checkboxLabels_Click">Etiquettes</CheckBox>
-            <TextBlock Style="{StaticResource mylabelstyle}" Text="Axe X:" />
-            <ComboBox Style="{StaticResource mycomboboxstyle}" ItemsSource="{Binding Path=OrdAxes}"
-                      SelectedItem="{Binding Path=XAxe}" Width="100" />
-            <TextBlock Style="{StaticResource mylabelstyle}" Text="Axe Y:" />
-            <ComboBox Style="{StaticResource mycomboboxstyle}" ItemsSource="{Binding Path=OrdAxes}"
-                      SelectedItem="{Binding Path=YAxe}" Width="100" />
-        </StackPanel>
-        <oxy:Plot Model="{Binding Path=CombinedPlotModel}" MinWidth="300" MinHeight="300" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
+        <oxy:Plot Model="{Binding Path=CombinedShowModel}" MinWidth="300" MinHeight="300" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
     </DockPanel>
 </UserControl>

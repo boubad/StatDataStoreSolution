@@ -111,12 +111,12 @@ namespace StatApp.ModelView
                             try
                             {
                                 image = new OxyImage(data);
+                                if (image != null)
+                                {
+                                    m_imagesdict[index] = image;
+                                }
                             }
                             catch (Exception /* ex */) { }
-                            if (image != null)
-                            {
-                                m_imagesdict[index] = image;
-                            }
                         }
                     }// ind
                 }// oSet
@@ -385,7 +385,6 @@ namespace StatApp.ModelView
                     m_currentX = value;
                     this.NotifyPropertyChanged("CurrentXVariable");
                     this.NotifyPropertyChanged("XVarName");
-                    this.CorrelationPlotModel = null;
                     this.RefreshCorrelationPlot();
                 }
             }
@@ -428,7 +427,6 @@ namespace StatApp.ModelView
                     m_currentY = value;
                     this.NotifyPropertyChanged("CurrentYVariable");
                     this.NotifyPropertyChanged("YVarName");
-                    this.CorrelationPlotModel = null;
                     this.RefreshCorrelationPlot();
                 }
             }
@@ -665,9 +663,8 @@ namespace StatApp.ModelView
                 {
                     m_currentcateg = value;
                     NotifyPropertyChanged("CurrentCategVariable");
-                    this.NormalModel = null;
-                    this.CategBoxPlotModel = null;
-                    this.CorrelationPlotModel = null;
+                    this.RefreshCorrelationPlot();
+                    this.RefreshCategBoxPlot();
                 }
             }
         }// CurrentCategVariable
@@ -1124,222 +1121,75 @@ namespace StatApp.ModelView
         {
             PlotModel model = null;
             CorrelData odata = null;
-            bool bLabel = this.HasLabels;
-            bool bImage = this.HasImages;
-            bool bPoints = this.HasPoints;
-            if ((!bLabel) && (!bImage) && (!bPoints))
-            {
-                return new Tuple<PlotModel, CorrelData>(model, odata);
-            }
-            var pMan = this.DataService;
             VariableDesc oVarY = this.CurrentYVariable;
             VariableDesc oVarX = this.CurrentXVariable;
-            if ((pMan == null) || (oVarX == null) || (oVarY == null))
-            {
-                return new Tuple<PlotModel, CorrelData>(model, odata);
-            }
-            if (oVarX == oVarY)
-            {
-                return new Tuple<PlotModel, CorrelData>(model, odata);
-            }
-            if ((!oVarX.IsNumVar) || (!oVarX.IsValid) || (!oVarY.IsNumVar) || (!oVarY.IsValid))
-            {
-                return new Tuple<PlotModel, CorrelData>(model, odata);
-            }
-            List<VariableDesc> clist = new List<VariableDesc>();
-            clist.Add(oVarX);
-            clist.Add(oVarY);
-            var vAll = GetCommonValues(clist);
-            IEnumerable<ValueDesc> xVals = null;
-            IEnumerable<ValueDesc> yVals = null;
-            foreach (var v in vAll.Keys)
-            {
-                if (v.Id == oVarX.Id)
-                {
-                    xVals = vAll[v];
-                }
-                else if (v.Id == oVarY.Id)
-                {
-                    yVals = vAll[v];
-                }
-            }// v
-            if ((xVals == null) || (yVals == null))
-            {
-                return new Tuple<PlotModel, CorrelData>(null, null);
-            }
-            List<double> xlist = new List<double>();
-            List<double> ylist = new List<double>();
-            IEnumerable<ValueDesc> categVals = null;
-            if ((this.CurrentCategVariable != null) && this.CurrentCategVariable.IsValid)
-            {
-                categVals = this.CurrentCategVariable.Values;
-            }
+            var allIndivs = this.AllIndividus;
             Dictionary<int, String> categDict = new Dictionary<int, string>();
-            Dictionary<int, Tuple<double, double>> vals = new Dictionary<int, Tuple<double, double>>();
-            List<DataPoint> alldata = new List<DataPoint>();
-            Dictionary<int, String> namesdict = new Dictionary<int, string>();
-            foreach (var vx in xVals)
+            List<Tuple<double, double, Cluster>> oList = null;
+            var oCateg = this.CurrentCategVariable;
+            if ((oCateg != null) && oCateg.IsValid)
+            {
+                var vals = oCateg.Values;
+                foreach (var ind in allIndivs)
+                {
+                    int index = ind.IndivIndex;
+                    var q = from x in vals where x.Index == index select x;
+                    if (q.Count() > 0)
+                    {
+                        String key = StatHelpers.ConvertValue(q.First().DataStringValue);
+                        if (!String.IsNullOrEmpty(key))
+                        {
+                            categDict[index] = key;
+                        }
+                    }// q
+                }// ind
+            }
+            else
+            {
+                String sval = DEFAULT_SERIE_NAME;
+                foreach (var ind in allIndivs)
+                {
+                    int index = ind.IndivIndex;
+                    categDict[index] = sval;
+                }// ind
+            }
+            List<IndivData> xList = new List<IndivData>();
+            foreach (var ind in allIndivs)
+            {
+                IndivData vv = new IndivData(ind);
+                xList.Add(vv);
+            }// ind
+            bool bPoints = this.HasPoints;
+            bool bLabels = this.HasLabels;
+            bool bImages = this.HasImages;
+            bool bZeroCrossing = false;
+            bool bLeastSquares = true;
+            var imagesDict = this.ImagesDictionary;
+            String title = String.Format("{0} / {1}", oVarY.Name, oVarX.Name);
+            model = CreateCartesianPlot(title, xList, oVarX, oVarY, imagesDict, categDict, bPoints, bLabels, bImages, bZeroCrossing,
+                bLeastSquares, oList);
+            List<double> xx = new List<double>();
+            List<double> yy = new List<double>();
+            var valsx = oVarX.Values;
+            var valsy = oVarY.Values;
+            foreach (var vx in valsx)
             {
                 int index = vx.Index;
-                if (index >= 0)
+                var q = from x in valsy where x.Index == index select x;
+                if (q.Count() > 0)
                 {
-                    var qx = from x in this.AllIndividus where x.IndivIndex == index select x;
-                    if (qx.Count() > 0)
-                    {
-                        var z = qx.First();
-                        String sval = z.IdString;
-                        if (String.IsNullOrEmpty(sval))
-                        {
-                            sval = z.Name;
-                        }
-                        if (!String.IsNullOrEmpty(sval))
-                        {
-                            namesdict[index] = sval;
-                        }
-                    }
-                    var q = from x in yVals where x.Index == index select x;
-                    if (q.Count() > 0)
-                    {
-                        var vy = q.First();
-                        double x = vx.DoubleValue;
-                        double y = vy.DoubleValue;
-                        vals[index] = new Tuple<double, double>(x, y);
-                        xlist.Add(x);
-                        ylist.Add(y);
-                        alldata.Add(new DataPoint(x, y));
-                        if (categVals == null)
-                        {
-                            categDict[index] = DEFAULT_SERIE_NAME;
-                        }
-                        else
-                        {
-                            var qq = from z in categVals where z.Index == index select z;
-                            if (qq.Count() > 0)
-                            {
-                                var key = StatHelpers.ConvertValue(qq.First().DataStringValue);
-                                if (!String.IsNullOrEmpty(key))
-                                {
-                                    categDict[index] = key;
-                                }
-                                else
-                                {
-                                    categDict[index] = DEFAULT_SERIE_NAME;
-                                }
-                            }
-                            else
-                            {
-                                categDict[index] = DEFAULT_SERIE_NAME;
-                            }
-                        }
-                    }
+                    double ty = q.First().DoubleValue;
+                    double tx = vx.DoubleValue;
+                    xx.Add(tx);
+                    yy.Add(ty);
                 }
-            }// v
-            String sTitle = String.Format("{0} / {1}", oVarY.Name, oVarX.Name);
-            model = new PlotModel(sTitle) { LegendPlacement = LegendPlacement.Outside };
-            model.LegendPlacement = LegendPlacement.Outside;
-            model.Axes.Add(new LinearAxis(AxisPosition.Bottom, xlist.Min(), xlist.Max(), oVarX.Name));
-            model.Axes.Add(new LinearAxis(AxisPosition.Left, ylist.Min(), ylist.Max(), oVarY.Name));
-            if (bLabel)
-            {
-                foreach (var index in namesdict.Keys)
-                {
-                    if (vals.ContainsKey(index))
-                    {
-                        IndivDesc ind = null;
-                        var qz = from x in this.AllIndividus where x.IndivIndex == index select x;
-                        if (qz.Count() > 0)
-                        {
-                            ind = qz.First();
-                        }
-                        var t = vals[index];
-                        double xx = t.Item1;
-                        double yy = t.Item2;
-                        String name = namesdict[index];
-                        if (!String.IsNullOrEmpty(name))
-                        {
-                            model.Annotations.Add(new TextAnnotation
-                            {
-                                Position = new DataPoint(xx, yy),
-                                Text = name,
-                                FontWeight = FontWeights.Bold,
-                                Tag = ind
-                            });
-                        }
-                    }
-                }// index
-            }// bLabel
-            if (bImage && (this.ImagesDictionary != null))
-            {
-                if (xlist.Count < 2)
-                {
-                    return new Tuple<PlotModel, CorrelData>(null, null);
-                }
-                double xwidth = 3.0 * (xlist.Max() - xlist.Min()) / xlist.Count;
-                foreach (var index in namesdict.Keys)
-                {
-                    if (vals.ContainsKey(index))
-                    {
-                        if (this.ImagesDictionary.ContainsKey(index))
-                        {
-                            IndivDesc ind = null;
-                            var qz = from x in this.AllIndividus where x.IndivIndex == index select x;
-                            if (qz.Count() > 0)
-                            {
-                                ind = qz.First();
-                            }
-                            var t = vals[index];
-                            double xx = t.Item1;
-                            double yy = t.Item2;
-                            model.Annotations.Add(new ImageAnnotation
-                            {
-                                ImageSource = this.ImagesDictionary[index],
-                                X = new PlotLength(xx, PlotLengthUnit.Data),
-                                Y = new PlotLength(yy, PlotLengthUnit.Data),
-                                HorizontalAlignment = HorizontalAlignment.Center,
-                                VerticalAlignment = VerticalAlignment.Middle,
-                                Width = new PlotLength(xwidth, PlotLengthUnit.Data)
-                            });
-                        }
-                    }
-                }// index
-            }// Image
-            if (bPoints)
-            {
-                Dictionary<String, ScatterSeries> oSeries = new Dictionary<string, ScatterSeries>();
-                foreach (var index in categDict.Keys)
-                {
-                    String scateg = categDict[index];
-                    if (!oSeries.ContainsKey(scateg))
-                    {
-                        oSeries[scateg] = new ScatterSeries(scateg) { MarkerType = MarkerType.Circle };
-                    }
-                    var q = from x in this.AllIndividus where x.IndivIndex == index select x;
-                    if (q.Count() > 0)
-                    {
-                        var ind = q.First();
-                        if (vals.ContainsKey(index))
-                        {
-                            var t = vals[index];
-                            double xx = t.Item1;
-                            double yy = t.Item2;
-                            (oSeries[scateg]).Points.Add(new ScatterPoint(xx, yy) { Tag = ind });
-                        }
-                    }//
-                }// index
-                foreach (var s1 in oSeries.Values)
-                {
-                    model.Series.Add(s1);
-                }
-            }// bPoints
-            odata = ComputeCorrelation(ylist.ToArray(), xlist.ToArray());
+            }// varx
+            odata = ComputeCorrelation(xx.ToArray(), yy.ToArray());
             if (odata != null)
             {
                 odata.FirstName = oVarY.Name;
                 odata.SecondName = oVarX.Name;
             }// odata
-            double a, b;
-            LeastSquaresFit(alldata, out a, out b);
-            model.Annotations.Add(new LineAnnotation { Slope = a, Intercept = b, Text = "Moindres Carrés" });
             return new Tuple<PlotModel, CorrelData>(model, odata);
         }//createCorrelationPlotModel
         public Task<PlotModel> createBoxPlotModelAsync()

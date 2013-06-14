@@ -22,6 +22,9 @@
             <TabItem Header="Classification hiérachique" x:Name="controlHierar">
                 <local:HierarchicalUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
+            <TabItem Header="Classes">
+                <local:CombinedOrdUserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </TabItem>
             <TabItem Header="Arrangement" x:Name="controlArrange">
                 <local:RowArrangeUserControl  />
             </TabItem>

@@ -22,7 +22,6 @@ namespace StatApp.Controles
     public partial class ClusterizeUserControl : UserControl
     {
         private OrdModelView m_model;
-        private bool m_busy = false;
         public ClusterizeUserControl()
         {
             InitializeComponent();
@@ -108,32 +107,6 @@ namespace StatApp.Controles
             model.RemoveVariables(oList);
             myUpdateUI();
         }
-        private void checkboxCateg_Click(object sender, RoutedEventArgs e)
-        {
-            if (m_busy)
-            {
-                return;
-            }
-            m_busy = true;
-            var model = getModel();
-            if (model != null)
-            {
-                var v = checkboxCateg.IsChecked;
-                if ((v != null) && v.HasValue && v.Value)
-                {
-                    this.comboboxCateg.IsEnabled = true;
-                }
-                else
-                {
-                    model.CurrentCategVariable = null;
-                    this.comboboxCateg.SelectedItem = null;
-                    this.comboboxCateg.IsEnabled = false;
-                }
-            }// model
-            myUpdateUI();
-            m_busy = false;
-        }
-
         private void comboboxMatriceMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var model = getModel();

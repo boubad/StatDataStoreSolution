@@ -102,18 +102,20 @@ namespace StatApp.Controles
             var model = getModel();
             if (model != null)
             {
+                model.CurrentCategVariable = null;
                 var v = checkboxCateg.IsChecked;
                 if ((v != null) && v.HasValue && v.Value)
                 {
                     this.comboboxCateg.IsEnabled = true;
+                    model.NotifyChange("AllCategVariables");
                 }
                 else
                 {
-                    model.CurrentCategVariable = null;
+                    this.comboboxCateg.SelectedIndex = -1;
                     this.comboboxCateg.IsEnabled = false;
-                    this.comboboxCateg.SelectedItem = null;
                 }
-                model.CorrelationPlotModel = null;
+                model.NotifyChange("CurrentCategVariable");
+                model.RefreshCorrelationPlot();
             }// model
             m_busy = false;
         }

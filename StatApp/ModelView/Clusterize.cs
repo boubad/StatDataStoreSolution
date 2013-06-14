@@ -71,7 +71,7 @@ namespace StatApp.ModelView
         {
             get
             {
-                return (this.GlobalCrit != 0.0) && (this.CurrentCrit != 0.0) && (this.Clusters.Count > 0);
+                return (this.Clusters.Count > 0);
             }
             set { }
         }// IsValid

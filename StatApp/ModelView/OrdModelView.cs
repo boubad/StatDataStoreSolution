@@ -44,6 +44,7 @@ namespace StatApp.ModelView
         private PlotModel m_kmeansshowmodel;
         private PlotModel m_clustershowmodel;
         private PlotModel m_arrangeshowmodel;
+        private PlotModel m_combinedshowmodel;
         private CategClusterSet m_hierarclusterset;
         private CategClusterSet m_categclusterset;
         private CategClusterSet m_kmeansclusterset;
@@ -136,6 +137,21 @@ namespace StatApp.ModelView
             }
         }// RefreshComputeVariables
         #region Properties
+        public PlotModel CombinedShowModel
+        {
+            get
+            {
+                return m_combinedshowmodel;
+            }
+            set
+            {
+                if (value != m_combinedshowmodel)
+                {
+                    m_combinedshowmodel = value;
+                    NotifyPropertyChanged("CombinedShowModel");
+                }
+            }
+        }// CombinedShoModel
         public PlotModel RowArrangePlot
         {
             get
@@ -988,7 +1004,8 @@ namespace StatApp.ModelView
             var inds = pDataModel.Individus;
             var vars = pDataModel.CurrentVariables.ToArray();
             int nv = vars.Length;
-            return Task.Run<Tuple<int[], DisplayItemsArray, PlotModel>>(() => {
+            return Task.Run<Tuple<int[], DisplayItemsArray, PlotModel>>(() =>
+            {
                 int[] pRows = null;
                 DisplayItemsArray oDisp = null;
                 PlotModel model = null;
@@ -1041,7 +1058,7 @@ namespace StatApp.ModelView
                             var ind = q.First();
                             DisplayItems line = new DisplayItems();
                             line.Tag = ind;
-                            line.Add(new DisplayItem(i+1));
+                            line.Add(new DisplayItem(i + 1));
                             line.Add(new DisplayItem(ind.IndivIndex));
                             line.Add(new DisplayItem(ind.IdString));
                             line.Add(new DisplayItem(ind.Name));
@@ -1098,12 +1115,12 @@ namespace StatApp.ModelView
                                 ddx[i] = (ddx[i] - vmin) / delta;
                             }// i
                             model = new PlotModel("Arrangements");
-                            model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Bottom,FontWeight=FontWeights.Bold });
-                            model.Axes.Add(new LinearAxis() { Title = "Distances", Minimum = ddx.Min(), Maximum = ddx.Max(), Position = AxisPosition.Left,FontWeight=FontWeights.Bold });
-                            model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Top,FontWeight=FontWeights.Bold });
-                            model.Axes.Add(new LinearAxis() { Title = "Cummul", Minimum = ddc.Min(), Maximum = ddc.Max(), Position = AxisPosition.Right ,FontWeight=FontWeights.Bold});
-                            var sx = new LineSeries { Title = "Distances", Smooth = true,FontWeight=FontWeights.Bold };
-                            var sy = new LineSeries { Title = "Cummul", Smooth = true,FontWeight=FontWeights.Bold };
+                            model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Bottom, FontWeight = FontWeights.Bold });
+                            model.Axes.Add(new LinearAxis() { Title = "Distances", Minimum = ddx.Min(), Maximum = ddx.Max(), Position = AxisPosition.Left, FontWeight = FontWeights.Bold });
+                            model.Axes.Add(new LinearAxis() { Title = "Position", Minimum = 0.0, Maximum = (double)(nx + 1), Position = AxisPosition.Top, FontWeight = FontWeights.Bold });
+                            model.Axes.Add(new LinearAxis() { Title = "Cummul", Minimum = ddc.Min(), Maximum = ddc.Max(), Position = AxisPosition.Right, FontWeight = FontWeights.Bold });
+                            var sx = new LineSeries { Title = "Distances", Smooth = true, FontWeight = FontWeights.Bold };
+                            var sy = new LineSeries { Title = "Cummul", Smooth = true, FontWeight = FontWeights.Bold };
                             for (int i = 0; i < nx; ++i)
                             {
                                 sx.Points.Add(new DataPoint((double)(i + 1), ddx[i]));
@@ -1118,7 +1135,7 @@ namespace StatApp.ModelView
                 {
                 }
                 return new Tuple<int[], DisplayItemsArray, PlotModel>(pRows, oDisp, model);
-            },cancellationToken);
+            }, cancellationToken);
         }//CreateArrangeDataAsync 
         #endregion // Mehods
         #region Helpers
@@ -1221,10 +1238,11 @@ namespace StatApp.ModelView
             updateCategClusterSet();
             updateKMeansClusterSet();
             updateHierarClusterSet();
-            RefreshArrangements(1,CancellationToken.None);
+            this.CombinedShowModel = createComninedShowPlot();
+            RefreshArrangements(1, CancellationToken.None);
             this.IsBusy = bOld;
         }// updatePlots
-        private async void updateCategClusterSet()
+        private void updateCategClusterSet()
         {
             var oSet = this.CategClusterSet;
             if (oSet == null)
@@ -1253,13 +1271,13 @@ namespace StatApp.ModelView
                 }// z
             }// cluster
             //this.ClusterHistogModel = await createClusterHistogPlot();
-            this.ClusterShowModel = await createClusterShowPlot();
+            this.ClusterShowModel = createClusterShowPlot();
             var old = this.Individus;
             this.Individus = null;
             this.Individus = old;
             this.IsBusy = false;
         }
-        private async void updateKMeansClusterSet()
+        private void updateKMeansClusterSet()
         {
             var oSet = this.KMeansClusterSet;
             if (oSet == null)
@@ -1288,7 +1306,7 @@ namespace StatApp.ModelView
                 }// z
             }// cluster
             //this.KMeansHistogModel = await createKMeansHistogPlot();
-            this.KMeansShowModel = await createKMeansShowPlot();
+            this.KMeansShowModel = createKMeansShowPlot();
             var old = this.Individus;
             this.Individus = null;
             this.Individus = old;
@@ -1300,7 +1318,7 @@ namespace StatApp.ModelView
             var xx = await TreeItem.Hierar(this, this.ClustersCount, this.LinkType, CancellationToken.None);
             this.HierarClusterSet = xx;
         }
-        private async void updateHierarClusterSet()
+        private void updateHierarClusterSet()
         {
             var oSet = this.HierarClusterSet;
             if (oSet == null)
@@ -1328,13 +1346,139 @@ namespace StatApp.ModelView
                     }
                 }// z
             }// cluster
-            //this.HierarHistogModel = await createHierarHistogPlot();
-            this.HierarShowModel = await createHierarShowPlot();
+            this.HierarShowModel = createHierarShowPlot();
             var old = this.Individus;
             this.Individus = null;
             this.Individus = old;
             this.IsBusy = false;
         }
+        private PlotModel createComninedShowPlot()
+        {
+            PlotModel model = null;
+            try
+            {
+                VariableDesc oVarY = this.CurrentYVariable;
+                VariableDesc oVarX = this.CurrentXVariable;
+                if ((oVarX == null) || (oVarY == null))
+                {
+                    return model;
+                }
+                if ((!oVarX.IsNumVar) || (!oVarY.IsNumVar) && (oVarX.Id == oVarY.Id))
+                {
+                    return model;
+                }
+                List<Tuple<double, double, Cluster>> oList = new List<Tuple<double, double, Cluster>>();
+                var o1 = StatModelViewBase.GetClustersCenters(oVarX, oVarY, this.CategClusterSet);
+                if ((o1 != null) && (o1.Count > 0))
+                {
+                    oList.AddRange(o1);
+                }
+                var o2 = StatModelViewBase.GetClustersCenters(oVarX, oVarY, this.KMeansClusterSet);
+                if ((o2 != null) && (o2.Count > 0))
+                {
+                    oList.AddRange(o2);
+                }
+                var o3 = StatModelViewBase.GetClustersCenters(oVarX, oVarY, this.HierarClusterSet);
+                if ((o3 != null) && (o3.Count > 0))
+                {
+                    oList.AddRange(o3);
+                }
+                var allIndivs = this.Individus;
+                Dictionary<int, String> categDict = new Dictionary<int, string>();
+                String sval = DEFAULT_SERIE_NAME;
+                foreach (var ind in allIndivs)
+                {
+                    int index = ind.IndivIndex;
+                    categDict[index] = sval;
+                }// ind;
+                bool bPoints = this.HasPoints;
+                bool bLabels = this.HasLabels;
+                bool bImages = this.HasImages;
+                bool bZeroCrossing = true;
+                bool bLeastSquares = false;
+                var imagesDict = this.ImagesDictionary;
+                model = CreateCartesianPlot("Classes", allIndivs, oVarX, oVarY, imagesDict, categDict, bPoints, bLabels, bImages, bZeroCrossing,
+                    bLeastSquares, oList);
+                if (model == null)
+                {
+                    return model;
+                }
+
+            }// try
+            catch (Exception /* ex */)
+            {
+                model = null;
+            }
+            return model;
+        }// createShowPlot
+        private PlotModel createShowPlot(String title, String prefix, CategClusterSet oSet)
+        {
+            PlotModel model = null;
+            try
+            {
+                VariableDesc oVarY = this.CurrentYVariable;
+                VariableDesc oVarX = this.CurrentXVariable;
+                if ((oVarX == null) || (oVarY == null))
+                {
+                    return model;
+                }
+                if ((!oVarX.IsNumVar) || (!oVarY.IsNumVar) && (oVarX.Id == oVarY.Id))
+                {
+                    return model;
+                }
+                var allIndivs = this.Individus;
+                Dictionary<int, String> categDict = new Dictionary<int, string>();
+                List<Tuple<double, double, Cluster>> oList = StatModelViewBase.GetClustersCenters(oVarX, oVarY, oSet);
+                if ((oSet != null) && oSet.IsValid)
+                {
+                    var clusters = oSet.Clusters;
+                    foreach (var cluster in clusters)
+                    {
+                        var col = cluster.Elements;
+                        String key = cluster.Name;
+                        if (String.IsNullOrEmpty(key))
+                        {
+                            key = String.Format(prefix, cluster.Index + 1);
+                        }
+                        foreach (var ind in col)
+                        {
+                            int index = ind.IndivIndex;
+                            if (index >= 0)
+                            {
+                                categDict[index] = key;
+                            }
+                        }// col
+                    }// cluster
+                }
+                else
+                {
+                    String sval = DEFAULT_SERIE_NAME;
+                    foreach (var ind in allIndivs)
+                    {
+                        int index = ind.IndivIndex;
+                        categDict[index] = sval;
+                    }// ind
+                }
+                bool bPoints = this.HasPoints;
+                bool bLabels = this.HasLabels;
+                bool bImages = this.HasImages;
+                bool bZeroCrossing = false;
+                bool bLeastSquares = false;
+                var imagesDict = this.ImagesDictionary;
+                model = CreateCartesianPlot(title, allIndivs, oVarX, oVarY, imagesDict, categDict, bPoints, bLabels, bImages, bZeroCrossing,
+                    bLeastSquares, oList);
+                if (model == null)
+                {
+                    return model;
+                }
+
+            }// try
+            catch (Exception /* ex */)
+            {
+                model = null;
+            }
+            return model;
+        }// createShowPlot
         private Tuple<PlotModel, PlotModel> createKMeansPlots()
         {
             PlotModel histog = null;
@@ -1413,126 +1557,33 @@ namespace StatApp.ModelView
             }
             return new Tuple<PlotModel, PlotModel>(histog, show);
         }// createKMeansPLots
-        private Task<PlotModel> createClusterShowPlot()
+        private PlotModel createClusterShowPlot()
         {
-            return Task.Run<PlotModel>(() =>
-            {
-                bool bPoints = this.HasPoints;
-                bool bLabels = this.HasLabels;
-                bool bImages = this.HasImages;
-                var oSet = this.CategClusterSet;
-                if (oSet == null)
-                {
-                    return null;
-                }
-                var clusters = oSet.Clusters;
-                VariableDesc oVarY = this.CurrentYVariable;
-                VariableDesc oVarX = this.CurrentXVariable;
-                var allIndivs = this.Individus;
-                Dictionary<int, String> categDict = new Dictionary<int, string>();
-                foreach (var cluster in clusters)
-                {
-                    var col = cluster.Elements;
-                    String key = cluster.Name;
-                    if (String.IsNullOrEmpty(key))
-                    {
-                        key = String.Format("UC{0}", cluster.Index + 1);
-                    }
-                    foreach (var ind in col)
-                    {
-                        int index = ind.IndivIndex;
-                        if (index >= 0)
-                        {
-                            categDict[index] = key;
-                        }
-                    }// col
-                }// classters
-                PlotModel model = CreateCartesianPlot("Category Utility", allIndivs, oVarX, oVarY, this.ImagesDictionary,
-                    categDict, bPoints, bLabels, bImages, false);
-                return model;
-            });
+            String title = "Category Utility";
+            String prefix = "UC{0}";
+            CategClusterSet oSet = this.CategClusterSet;
+            return this.createShowPlot(title, prefix, oSet);
         }// createCategHistogPlot
-        private Task<PlotModel> createKMeansShowPlot()
+        private PlotModel createKMeansShowPlot()
         {
-            return Task.Run<PlotModel>(() =>
-            {
-                bool bPoints = this.HasPoints;
-                bool bLabels = this.HasLabels;
-                bool bImages = this.HasImages;
-                var oSet = this.KMeansClusterSet;
-                if (oSet == null)
-                {
-                    return null;
-                }
-                var clusters = oSet.Clusters;
-                VariableDesc oVarY = this.CurrentYVariable;
-                VariableDesc oVarX = this.CurrentXVariable;
-                var allIndivs = this.Individus;
-                Dictionary<int, String> categDict = new Dictionary<int, string>();
-                foreach (var cluster in clusters)
-                {
-                    var col = cluster.Elements;
-                    String key = cluster.Name;
-                    if (String.IsNullOrEmpty(key))
-                    {
-                        key = String.Format("KM{0}", cluster.Index + 1);
-                    }
-                    foreach (var ind in col)
-                    {
-                        int index = ind.IndivIndex;
-                        if (index >= 0)
-                        {
-                            categDict[index] = key;
-                        }
-                    }// col
-                }// classters
-                PlotModel model = CreateCartesianPlot("KMeans", allIndivs, oVarX, oVarY, this.ImagesDictionary, categDict, bPoints, bLabels, bImages, false);
-                return model;
-            });
+            String title = "Nuées dynamiques";
+            String prefix = "KM{0}";
+            CategClusterSet oSet = this.KMeansClusterSet;
+            return this.createShowPlot(title, prefix, oSet);
         }// createCategHistogPlot
-        private Task<PlotModel> createHierarShowPlot()
+        private PlotModel createHierarShowPlot()
         {
-            return Task.Run<PlotModel>(() =>
-            {
-                bool bPoints = this.HasPoints;
-                bool bLabels = this.HasLabels;
-                bool bImages = this.HasImages;
-                var oSet = this.HierarClusterSet;
-                if (oSet == null)
-                {
-                    return null;
-                }
-                var clusters = oSet.Clusters;
-                VariableDesc oVarY = this.CurrentYVariable;
-                VariableDesc oVarX = this.CurrentXVariable;
-                var allIndivs = this.Individus;
-                Dictionary<int, String> categDict = new Dictionary<int, string>();
-                foreach (var cluster in clusters)
-                {
-                    var col = cluster.Elements;
-                    String key = cluster.Name;
-                    if (String.IsNullOrEmpty(key))
-                    {
-                        key = String.Format("HR{0}", cluster.Index + 1);
-                    }
-                    foreach (var ind in col)
-                    {
-                        int index = ind.IndivIndex;
-                        if (index >= 0)
-                        {
-                            categDict[index] = key;
-                        }
-                    }// col
-                }// classters
-                PlotModel model = CreateCartesianPlot("Hierarchical", allIndivs, oVarX, oVarY, this.ImagesDictionary, categDict, bPoints, bLabels, bImages, false);
-                return model;
-            });
+            String title = "Classificatiion hiérarchique";
+            String prefix = "HR{0}";
+            CategClusterSet oSet = this.HierarClusterSet;
+            return this.createShowPlot(title, prefix, oSet);
         }// createCategHistogPlot
-        private async void refreshShowPlot()
+        private void refreshShowPlot()
         {
-            this.ClusterShowModel = await createClusterShowPlot();
-            this.KMeansShowModel = await createKMeansShowPlot();
-            this.HierarShowModel = await createHierarShowPlot();
+            this.ClusterShowModel = createClusterShowPlot();
+            this.KMeansShowModel = createKMeansShowPlot();
+            this.HierarShowModel = createHierarShowPlot();
+            this.CombinedShowModel = createComninedShowPlot();
         }
         private DisplayItemsArray createOrdDisplayData()
         {

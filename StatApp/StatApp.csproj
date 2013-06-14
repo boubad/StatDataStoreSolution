@@ -169,9 +169,6 @@
     </Compile>
     <Compile Include="Controles\MatCellItem.cs" />
     <Compile Include="Controles\MatCellItemDataTemplateSelector.cs" />
-    <Compile Include="Controles\MatOrdUserControl.xaml.cs">
-      <DependentUpon>MatOrdUserControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controles\MatriceUserControl.xaml.cs">
       <DependentUpon>MatriceUserControl.xaml</DependentUpon>
     </Compile>
@@ -280,10 +277,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controles\MainMenuUserControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controles\MatOrdUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

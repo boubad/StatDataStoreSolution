@@ -24,40 +24,6 @@ namespace StatApp.Controles
         {
             InitializeComponent();
         }
-        private OrdModelView getModel()
-        {
-            OrdModelView model = null;
-            Object obj = this.DataContext;
-            if ((obj != null) && (obj is OrdModelView))
-            {
-                model = obj as OrdModelView;
-            }
-            return model;
-        }// getModel
-        private void checkboxLabels_Click(object sender, RoutedEventArgs e)
-        {
-            var model = getModel();
-            if (model != null)
-            {
-                var v = checkboxLabels.IsChecked;
-                if ((v != null) && v.HasValue)
-                {
-                    model.HasLabels = v.Value;
-                }
-                else
-                {
-                    model.HasLabels = false;
-                }
-            }// model
-        }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            var model = getModel();
-            if (model != null)
-            {
-                checkboxLabels.IsChecked = model.HasLabels;
-            }// model
-        }
+        
     }
 }

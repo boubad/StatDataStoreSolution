@@ -77,7 +77,7 @@ namespace StatApp.Controles
                 else
                 {
                     model.CurrentCategVariable = null;
-                    this.comboboxCateg.SelectedItem = null;
+                    this.comboboxCateg.SelectedIndex = -1;
                     this.comboboxCateg.IsEnabled = false;
                 }
                 model.CategBoxPlotModel = null;
