@@ -130,32 +130,17 @@ namespace StatData
         #region Methods
         public async void Refresh(IStoreDataManager pMan)
         {
-            if (pMan == null)
-            {
-                return;
-            }
-            if (!this.IsValid)
-            {
-                return;
-            }
-            if (this.IsBusy)
-            {
-                return;
-            }
-            var oSet = this;
             this.IsBusy = true;
-            var tt = await Task.Run<Tuple<IndivDescs, VariableDescs, Exception>>(() =>
-            {
-                return pMan.FetchAllDataSetData(oSet);
-            });
+            var t = await RefreshAllAsync(pMan);
+            this.Variables = t.Item2;
+            this.Individus = t.Item1;
             this.IsBusy = false;
-            if ((tt != null) && (tt.Item3 == null))
-            {
-                this.Individus = tt.Item1;
-                this.Variables = tt.Item2;
-                this.IsDone = true;
-            }
-        }// Refresh
+            NotifyPropertyChanged("IsDone");
+        }// REfreshVariables
+        public async void RefreshIndivs(IStoreDataManager pMan)
+        {
+            this.Individus = await RefreshIndivsAsync(pMan);
+        }
         public async void Maintains(IStoreDataManager pMan)
         {
             if (pMan == null)
@@ -186,7 +171,7 @@ namespace StatData
                 this.IsDone = true;
             }
         }// Maintains
-        public async void MaintainsVariable(VariableDesc oVar, IStoreDataManager pMan)
+        public void MaintainsVariable(VariableDesc oVar, IStoreDataManager pMan)
         {
             if ((oVar == null) || (pMan == null))
             {
@@ -197,27 +182,54 @@ namespace StatData
             {
                 return;
             }
-            this.IsBusy = true;
-            var tt = await Task.Run<Tuple<VariableDesc, Exception>>(() =>
-            {
-                return pMan.MaintainsVariable(oVar);
-            });
-            if ((tt != null) && (tt.Item1 != null) && (tt.Item2 == null))
-            {
-                var xVar = tt.Item1;
-                oVar.Id = xVar.Id;
-                oVar.Name = xVar.Name;
-                oVar.DataSetId = xVar.DataSetId;
-                oVar.DataType = xVar.DataType;
-                oVar.Description = xVar.Description;
-                oVar.IsCategVar = xVar.IsCategVar;
-                oVar.IsIdVar = xVar.IsIdVar;
-                oVar.IsImageVar = xVar.IsImageVar;
-                oVar.IsInfoVar = xVar.IsInfoVar;
-                oVar.IsNameVar = xVar.IsNameVar;
-            }
-            this.IsBusy = false;
+            oVar.Maintains(pMan);
         }// Maintains
+        public static Task<StatDataSets> GetAllDataSetAsync(IStoreDataManager pMan)
+        {
+            return Task.Run<StatDataSets>(() => {
+                StatDataSets pRet = null;
+                var t = pMan.GetAllStatDataSets();
+                if ((t != null) && (t.Item1 != null) && (t.Item2 == null))
+                {
+                    pRet = new StatDataSets(t.Item1);
+                }
+                return pRet;
+            });
+        }// GetAllDataSetAsync
+        public Task<VariableDescs> RefreshVariablesAsync(IStoreDataManager pMan)
+        {
+            StatDataSet oSet = this;
+            return Task.Run<VariableDescs>(() => {
+                VariableDescs oRet = null;
+                var t = pMan.GetDataSetVariables(oSet);
+                if ((t != null) && (t.Item1 != null) && (t.Item2 == null))
+                {
+                    oRet = new VariableDescs(t.Item1);
+                }
+                return oRet;
+            });
+        }// RefreshVariablesAsync
+        public Task<IndivDescs> RefreshIndivsAsync(IStoreDataManager pMan)
+        {
+            StatDataSet oSet = this;
+            return Task.Run<IndivDescs>(() =>
+            {
+                IndivDescs oRet = null;
+                var t = pMan.GetDataSetIndivs(oSet);
+                if ((t != null) && (t.Item1 != null) && (t.Item2 == null))
+                {
+                    oRet = new IndivDescs(t.Item1);
+                }
+                return oRet;
+            });
+        }// RefreshVariablesAsync
+        public Task<Tuple<IndivDescs, VariableDescs, Exception>> RefreshAllAsync(IStoreDataManager pMan)
+        {
+            StatDataSet oSet = this;
+            return Task.Run<Tuple<IndivDescs, VariableDescs, Exception>>(() => {
+                return pMan.FetchAllDataSetData(oSet);
+            });
+        }// RefreshAllAsync
         #endregion // Methods
     }// class StatDataSet
     [Serializable]

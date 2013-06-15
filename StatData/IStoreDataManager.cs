@@ -18,6 +18,7 @@ namespace StatData
         Tuple<IEnumerable<VariableDesc>, Exception> GetDataSetVariablesAndData(StatDataSet oSet);
         Tuple<IndivDescs, VariableDescs, Exception> FetchAllDataSetData(StatDataSet oSet);
         Tuple<VariableDesc, Exception> MaintainsVariable(VariableDesc oVar);
+        Tuple<VariableDesc, Exception> GetVariable(VariableDesc oVar);
         Tuple<bool, Exception> MaintainsVariableAndValues(IEnumerable<VariableDesc> oVars);
         Tuple<bool, Exception> RemoveVariable(VariableDesc oVar);
         Tuple<int, Exception> GetVariableValuesCount(VariableDesc oVar);

@@ -798,18 +798,31 @@ namespace StatApp.ModelView
         {
             get
             {
+                if (m_currentvariable != null)
+                {
+                    if ((!m_currentvariable.HasValues) || (!m_currentvariable.HasInfo))
+                    {
+                        m_currentvariable.Refresh(this.DataService);
+                    }
+                    return m_currentvariable;
+                }
                 return (m_currentvariable == null) ? new VariableDesc() : m_currentvariable;
             }
             set
             {
                 if (value != m_currentvariable)
                 {
+                    if (m_currentvariable != null)
+                    {
+                        m_currentvariable.PropertyChanged -= m_currentvariable_PropertyChanged;
+                    }
                     m_currentvariable = value;
                     NotifyPropertyChanged("CurrentVariable");
                     NotifyPropertyChanged("VariableName");
                     NotifyPropertyChanged("VariableType");
                     if (m_currentvariable != null)
                     {
+                        m_currentvariable.PropertyChanged += m_currentvariable_PropertyChanged;
                         this.Skip = 0;
                         m_values = null;
                         NotifyPropertyChanged("Skip");
@@ -822,6 +835,17 @@ namespace StatApp.ModelView
                     this.RefreshNormalPlotModel();
                     this.RefreshHistogPlotModel();
                 }
+            }
+        }
+
+        void m_currentvariable_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            String name = e.PropertyName;
+            if ((name == "Values") || (name == "Info"))
+            {
+                NotifyPropertyChanged("CurrentVariable");
+                NotifyPropertyChanged("VariableName");
+                NotifyPropertyChanged("VariableType");
             }
         }// CurrentVariable
         public String VariableName
@@ -925,6 +949,14 @@ namespace StatApp.ModelView
                 NotifyPropertyChanged("IsBusy");
                 return;
             }
+            if (name == "Variables")
+            {
+                NotifyPropertyChanged("Variables");
+            }
+            if (name == "Individus")
+            {
+                NotifyPropertyChanged("AllIndividus");
+            }
             if (name == "IsDone")
             {
                 NotifyPropertyChanged("CurrentStatDataSet");
@@ -978,21 +1010,7 @@ namespace StatApp.ModelView
             var pMan = this.DataService;
             if (pMan != null)
             {
-                var xx = await Task.Run<Tuple<IEnumerable<StatDataSet>, Exception>>(() =>
-                {
-                    return pMan.GetAllStatDataSets();
-                });
-                if (xx != null)
-                {
-                    if ((xx.Item1 != null) && (xx.Item2 == null))
-                    {
-                        this.StatDataSets = new StatDataSets(xx.Item1);
-                    }
-                    else if (xx.Item2 != null)
-                    {
-                        ShowError(xx.Item2);
-                    }
-                }// xx
+                this.StatDataSets = await StatDataSet.GetAllDataSetAsync(pMan);
             }// pMan
         }// RefreshDataSets
         public async void RefreshVariables()

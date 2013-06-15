@@ -376,6 +376,170 @@ namespace StatData
             return this.Name.ToLower().GetHashCode();
         }
         #endregion // overrides
+        #region Methods
+        public void Refresh(IStoreDataManager pMan)
+        {
+            this.RefreshVariable(pMan);
+            this.RefreshInfo(pMan);
+            this.RefreshValues(pMan);
+        }// Refresh
+        public async void RefreshVariable(IStoreDataManager pMan)
+        {
+            var p = await RefreshVariableAsync(pMan);
+            if (p != null)
+            {
+                this.Id = p.Id;
+                this.DataSetId = p.DataSetId;
+                this.Name = p.Name;
+                this.DataType = p.DataType;
+                this.Description = p.Description;
+                this.IsIdVar = p.IsIdVar;
+                this.IsNameVar = p.IsNameVar;
+                this.IsCategVar = p.IsCategVar;
+                this.IsInfoVar = p.IsInfoVar;
+                this.IsImageVar = p.IsNumVar;
+            }// p
+        }// RefreshVariable
+        public async void RefreshInfo(IStoreDataManager pMan)
+        {
+            this.Info = await RefreshInfoAsync(pMan);
+        }// RefreshInfo
+        public async void RefreshValues(IStoreDataManager pMan)
+        {
+            this.Values = await RefreshValuesAsync(pMan);
+        }// RefreshValues
+        public async void Maintains(IStoreDataManager pMan)
+        {
+            VariableDesc p = await MaintainsAsync(pMan);
+            if (p != null)
+            {
+                this.Id = p.Id;
+                this.DataSetId = p.DataSetId;
+            }
+        }// Maintains
+        #region Async Methods
+        public Task<ValueDescs> RefreshValuesAsync(IStoreDataManager pMan)
+        {
+            VariableDesc oVar = this;
+            return Task.Run<ValueDescs>(() => {
+                ValueDescs oRet = null;
+                var t = pMan.GetVariableValues(oVar, 0, 0);
+                if ((t != null) && (t.Item1 != null) && (t.Item2 != null))
+                {
+                    oRet = new ValueDescs(t.Item1);
+                }
+                return oRet;
+            });
+        }// RefreshValuesAsync
+        public Task<VariableInfo> RefreshInfoAsync(IStoreDataManager pMan)
+        {
+            VariableDesc oVar = this;
+            return Task.Run<VariableInfo>(() =>
+            {
+                VariableInfo oRet = null;
+                var t = pMan.GetVariableInfo(oVar);
+                if ((t != null) && (t.Item1 != null) && (t.Item2 != null))
+                {
+                    oRet = t.Item1;
+                }
+                return oRet;
+            });
+        }// RefreshInfoAsync
+        public Task<VariableDesc> RefreshVariableAsync(IStoreDataManager pMan)
+        {
+            VariableDesc oVar = this;
+            return Task.Run<VariableDesc>(() =>
+            {
+                VariableDesc oRet = null;
+                var t = pMan.GetVariable(oVar);
+                if ((t != null) && (t.Item1 != null) && (t.Item2 != null))
+                {
+                    oRet = t.Item1;
+                }
+                return oRet;
+            });
+        }// RefreshVariableAsync
+        public Task<Tuple<VariableDesc,ValueDescs,VariableInfo>> RefreshAsync(IStoreDataManager pMan)
+        {
+            VariableDesc oVar = this;
+            return Task.Run<Tuple<VariableDesc,ValueDescs, VariableInfo>>(() => {
+                IEnumerable<ValueDesc> vals = null;
+                VariableInfo info = null;
+                VariableDesc xVar = null;
+                //
+                Parallel.Invoke(()=>{
+                    var t = pMan.GetVariable(oVar);
+                    if ((t != null) && (t.Item2 == null))
+                    {
+                        xVar = t.Item1;
+                    }
+                },
+                    () => {
+                    var t = pMan.GetVariableValues(oVar, 0, 0);
+                    if ((t != null) && (t.Item2 == null))
+                    {
+                        vals = t.Item1;
+                    }
+                },
+                    () => {
+                        var t = pMan.GetVariableInfo(oVar);
+                        if ((t != null) && (t.Item2 == null))
+                        {
+                            info = t.Item1;
+                        }
+                    });
+                //
+                ValueDescs vv = (vals == null) ? new ValueDescs() : new ValueDescs(vals);
+                return new Tuple<VariableDesc,ValueDescs, VariableInfo>(xVar,vv, info);
+            });
+        }// RefreshAsync
+        public Task<VariableDesc> MaintainsAsync(IStoreDataManager pMan)
+        {
+            VariableDesc oVar = this;
+            return Task.Run<VariableDesc>(() => {
+                VariableDesc pVar = null;
+                var t = pMan.MaintainsVariable(oVar);
+                if ((t != null) && (t.Item1 != null) && (t.Item2 == null))
+                {
+                    pVar = t.Item1;
+                }
+                return pVar;
+            });
+        }// MaintainsAsync
+        public Task<bool> WriteValuesAsync(IStoreDataManager pMan,IEnumerable<ValueDesc> vals)
+        {
+            VariableDesc oVar = this;
+            int nVarId = this.Id;
+            return Task.Run<bool>(() => {
+                bool bRet = false;
+                if ((vals != null) && (nVarId != 0))
+                {
+                    List<ValueDesc> oList = new List<ValueDesc>();
+                    foreach (var v in vals)
+                    {
+                        if (v != null)
+                        {
+                            if ((v.Index >= 0) && v.IsModified)
+                            {
+                                v.VariableId = nVarId;
+                                oList.Add(v);
+                            }// index
+                        }// v
+                    }// v
+                    if (oList.Count  > 0)
+                    {
+                        var t = pMan.WriteValues(oList);
+                        if ((t != null) && t.Item1 && (t.Item2 == null))
+                        {
+                            bRet = true;
+                        }
+                    }
+                }// vals
+                return bRet;
+            });
+        }// WritesValuesAsync
+        #endregion // Async Methods
+        #endregion // Methods
     }// class VariableDesc
     [Serializable]
     public class VariableDescs : ObservableCollection<VariableDesc>

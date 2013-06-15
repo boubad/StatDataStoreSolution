@@ -803,13 +803,6 @@ namespace StatApp.Data
                         {
                             VariableDesc pp = new VariableDesc();
                             convertVariable(p, pp);
-                            var xx = getVariableInfo(ctx, pp);
-                            if (xx.Item2 != null)
-                            {
-                                return new Tuple<IEnumerable<VariableDesc>, Exception>(oRet, err);
-                            }
-                            pp.Info = xx.Item1;
-
                             oRet.Add(pp);
                         }// p
                     }// pSet
@@ -879,6 +872,31 @@ namespace StatApp.Data
             }
             return new Tuple<IEnumerable<VariableDesc>, Exception>(oRet, err);
         }//GetDataSetVariablesAndData
+        public Tuple<VariableDesc, Exception> GetVariable(VariableDesc oVar)
+        {
+            VariableDesc oRet = null;
+            Exception err = null;
+            if (oVar == null)
+            {
+                return new Tuple<VariableDesc, Exception>(null, new ArgumentNullException());
+            }
+            try
+            {
+                using (var ctx = getContext())
+                {
+                    DbVariable p = findVariable(ctx, oVar);
+                    if (p != null)
+                    {
+                        convertVariable(p, oRet);
+                    }
+                }// ctx
+            }
+            catch (Exception ex)
+            {
+                err = ex;
+            }
+            return new Tuple<VariableDesc, Exception>(oRet, err);
+        }
         public Tuple<VariableDesc, Exception> MaintainsVariable(VariableDesc oVar)
         {
             VariableDesc oRet = null;
@@ -2136,7 +2154,6 @@ namespace StatApp.Data
             return new Tuple<bool, Exception>(bRet, err);
         }
         #endregion // IStoreDataManager implementation
-
         #region Photos
         public Tuple<int, Exception> GetPhotosCount()
         {
@@ -2458,19 +2475,5 @@ namespace StatApp.Data
             return new Tuple<int, Exception>(nRet, err);
         }
         #endregion // Photos
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }// class DomainDataManager
 }
